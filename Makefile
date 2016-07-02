@@ -3,7 +3,7 @@
 
 auto: build unix compile
 
-compile:
+compile: dependencies
 	cd build; make -j5
 
 linux: unix
