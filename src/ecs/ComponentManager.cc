@@ -17,6 +17,6 @@ namespace ecs
 		}
 
 		Assert(compMask == ComponentMask(),
-				   "component mask not blank after removing all components");
+			"component mask not blank after removing all components");
 	}
 }
