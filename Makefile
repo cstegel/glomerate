@@ -3,15 +3,15 @@
 
 auto: build unix compile
 
-compile: dependencies
+compile:
 	cd build; make -j5
 
 linux: unix
-unix: build
+unix: build dependencies
 	cd build; cmake -G "Unix Makefiles" ..
 
 windows: vs14
-vs14: build
+vs14: build dependencies
 	cd build; cmake -G "Visual Studio 14" ..
 
 clean:
