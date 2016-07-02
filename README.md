@@ -46,6 +46,8 @@ int main(int argc, char **argv)
 		          << ", z: " << position->z
 		          << std::endl;
 	}
+
+	return 0;
 }
 
 ```
