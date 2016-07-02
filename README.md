@@ -16,30 +16,44 @@ The library will be compiled to "bin/Debug/libconglomerate.a" on linux by defaul
 Below is a very simple example of using the ECS.  For the full API, see Entity.hh and EntityManager.hh.  Other practical examples can be found in "tests/integration/ecs.cc".
 
 ```c++
+// conglomerate's "include" dir must be on your project's include path
+#include "Ecs.hh"
+
+#include <iostream>
+
 struct Position {
 	Position() {}
 	Position(float x, y, z) : x(x), y(y), z(z) {}
 	float x, y, z;
 };
 
-ecs::EntityManager entityManager;
-
-// not needed, but recommended
-entityManager.RegisterComponentType<Position>();
-
-ecs::Entity entity = entityManager.NewEntity();
-entity.Assign<Position>(1, 2, 3);
-
-for (ecs::Entity e : entityManager.EntitiesWith<Position>())
+int main(int argc, char **argv)
 {
-	ecs::Handle<Position> position = e.Get<Position>();
-	std::cout << e
-	          << " has x: " << position->x
-	          << ", y: " << position-y
-	          << ", z: " << position->z
-	          << std::endl;
+	ecs::EntityManager entityManager;
+
+	// not needed, but recommended
+	entityManager.RegisterComponentType<Position>();
+
+	ecs::Entity entity = entityManager.NewEntity();
+	entity.Assign<Position>(1, 2, 3);
+
+	for (ecs::Entity e : entityManager.EntitiesWith<Position>())
+	{
+		ecs::Handle<Position> position = e.Get<Position>();
+		std::cout << e
+		          << " has x: " << position->x
+		          << ", y: " << position-y
+		          << ", z: " << position->z
+		          << std::endl;
+	}
 }
 
+```
+
+Output:
+
+```c++
+(Index: 1, Gen: 0) has x: 1, y: 2,  z: 3
 ```
 
 # Tests
