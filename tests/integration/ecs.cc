@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "ecs/Ecs.hh"
+#include "Ecs.hh"
 
 namespace test
 {

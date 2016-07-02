@@ -4,8 +4,8 @@
 // Impl is needed to be included since many functions are templated
 // Defn/Impl is split between headers because of cyclic dependencies
 
-#include "Entity.hh"
-#include "EntityManager.hh"
+#include "ecs/Entity.hh"
+#include "ecs/EntityManager.hh"
 
-#include "EntityImpl.hh"
-#include "EntityManagerImpl.hh"
+#include "ecs/EntityImpl.hh"
+#include "ecs/EntityManagerImpl.hh"
