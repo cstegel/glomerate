@@ -24,9 +24,6 @@ foreach(test_type unit integration)
 	add_executable(${test_exe} ${test_sources} ${test_headers})
 	target_link_libraries(${test_exe} ${PROJECT_LIB} gtest gtest_main)
 
-	# C++11
-	target_compile_features(${test_exe} PRIVATE cxx_range_for)
-
 	# target to run the tests
 	add_custom_target(
 		${test_type}-tests

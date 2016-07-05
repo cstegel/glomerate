@@ -1,8 +1,9 @@
 project(ecs)
-set(CMAKE_MIN_VERSION 3.1)
+set(CMAKE_MIN_VERSION 2.8)
 cmake_minimum_required(VERSION ${CMAKE_MIN_VERSION} FATAL_ERROR)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
 if (UNIX)
 	add_definitions(-Wall)
@@ -59,9 +60,6 @@ add_library(${PROJECT_LIB} ${all_sources} ${all_headers})
 set_target_properties(${PROJECT_LIB} PROPERTIES
                       OUTPUT_NAME conglomerate
                       POSITION_INDEPENDENT_CODE ON)
-
-# C++11
-target_compile_features(${PROJECT_LIB} PRIVATE cxx_range_for)
 
 # Installations
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
