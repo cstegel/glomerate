@@ -40,7 +40,6 @@ set(GOOGLETEST_DIR ${EXT_PATH}/googletest/googletest)
 add_subdirectory(${EXT_PATH}/googletest)
 
 include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}/src
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${EXT_PATH}/boostconfig/include
 	${EXT_PATH}

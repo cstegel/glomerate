@@ -1,5 +1,5 @@
-#include "Entity.hh"
-#include "EntityManager.hh"
+#include "ecs/Entity.hh"
+#include "ecs/EntityManager.hh"
 
 namespace ecs
 {
