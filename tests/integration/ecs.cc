@@ -124,6 +124,10 @@ namespace test
 	{
 		for (ecs::Entity ent : em.EntitiesWith<Eater, Position>())
 		{
+			// ensure we can retrieve these components
+			auto eater = ent.Get<Eater>();
+			auto position = ent.Get<Position>();
+
 			entsFound[ent] = true;
 		}
 
@@ -150,6 +154,46 @@ namespace test
 		}
 
 		ExpectPositionEntitiesFound();
+	}
+
+	/**
+	 * This is a test for the fix in commit ea35fb59156261ff16f9993dd5c40410aefd335e
+	 * The bug was that when iterating over multiple component types the
+	 * "begin" iterator under the hood would start at the beginning of a component
+	 * pool instead of advancing to the first component that belonged to an entity
+	 * that had all the components specified.
+	 */
+	TEST(EcsBugFix, IterateOverComponentsSkipsFirstInvalidComponents)
+	{
+		ecs::EntityManager em;
+		ecs::Entity ePos1 = em.NewEntity();
+		ecs::Entity ePos2 = em.NewEntity();
+		ecs::Entity ePosEater = em.NewEntity();
+		ecs::Entity eEater1 = em.NewEntity();
+		ecs::Entity eEater2 = em.NewEntity();
+		ecs::Entity eEater3 = em.NewEntity();
+
+		// ensure that first 2 components in the Position pool don't have Eater components
+		ePos1.Assign<Position>();
+		ePos2.Assign<Position>();
+
+		// create the combination entity we will query for
+		ePosEater.Assign<Position>();
+		ePosEater.Assign<Eater>();
+
+		// create more Eater components than Position components so that
+		// when we iterate over Position, Eater, we will iterate through
+		// the Position pool instead of the Eater pool
+		eEater1.Assign<Eater>();
+		eEater2.Assign<Eater>();
+		eEater3.Assign<Eater>();
+
+		for (auto e : em.EntitiesWith<Position, Eater>())
+		{
+			// without bugfix, the Eater assertion will fail
+			ASSERT_TRUE(e.Has<Eater>()) << " bug has regressed";
+			ASSERT_TRUE(e.Has<Position>());
+		}
 	}
 
 	TEST(EcsBasic, AddEntitiesWhileIterating)
