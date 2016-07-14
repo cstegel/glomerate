@@ -36,9 +36,6 @@ endif()
 
 set(EXT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ext)
 
-set(GOOGLETEST_DIR ${EXT_PATH}/googletest/googletest)
-add_subdirectory(${EXT_PATH}/googletest)
-
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${EXT_PATH}/boostconfig/include
@@ -75,4 +72,10 @@ install(TARGETS conglomerate
 ################################################
 # Build tests
 ################################################
-add_subdirectory(tests)
+
+OPTION(BUILD_TESTS "Build test executables" OFF)
+IF (BUILD_TESTS)
+	set(GOOGLETEST_DIR ${EXT_PATH}/googletest/googletest)
+	add_subdirectory(${EXT_PATH}/googletest)
+	add_subdirectory(tests)
+ENDIF (BUILD_TESTS)

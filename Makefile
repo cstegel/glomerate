@@ -7,23 +7,23 @@ compile:
 	cd build; make -j5
 
 linux: unix
-unix: build dependencies
+unix: build
 	cd build; cmake -G "Unix Makefiles" ..
 
 windows: vs14
-vs14: build dependencies
+vs14: build
 	cd build; cmake -G "Visual Studio 14" ..
 
 clean:
-	rm -rf build bin
+	rm -rf build bin lib
 
 build:
 	mkdir -p build
 
-unit-tests: build unix
+unit-tests: build dependencies unix
 	cd build; make unit-tests
 
-integration-tests: build unix
+integration-tests: build dependencies unix
 	cd build; make integration-tests
 
 tests: unit-tests integration-tests
