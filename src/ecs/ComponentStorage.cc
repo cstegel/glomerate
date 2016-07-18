@@ -37,12 +37,20 @@ namespace ecs
 	ComponentPoolEntityCollection::Iterator &ComponentPoolEntityCollection::Iterator::operator++()
 	{
 		compIndex++;
+		if (compIndex > pool.Size())
+		{
+			throw std::runtime_error(
+				"Cannot increment entity component iterator more than 1 time past the end of its pool. "
+				"You are likely calling operator++ on an EntityCollection::Iterator that is at the end.  "
+				"Try comparing it to <your EntityCollection>::end()");
+		}
 		return *this;
 	}
 
 	Entity::Id ComponentPoolEntityCollection::Iterator::operator*()
 	{
-		Assert(compIndex < pool.Size());
+		Assert(compIndex < pool.Size(),
+			"trying to access entity that is past the end of this component pool");
 		return pool.entityAt(compIndex);
 	}
 }

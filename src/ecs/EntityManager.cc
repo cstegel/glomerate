@@ -132,11 +132,11 @@ namespace ecs
 		return *this;
 	}
 
-	bool EntityManager::EntityCollection::Iterator::operator==(Iterator &other)
+	bool EntityManager::EntityCollection::Iterator::operator==(const Iterator &other)
 	{
 		return compMask == other.compMask && compIt == other.compIt;
 	}
-	bool EntityManager::EntityCollection::Iterator::operator!=(Iterator &other)
+	bool EntityManager::EntityCollection::Iterator::operator!=(const Iterator &other)
 	{
 		return !(*this == other);
 	}

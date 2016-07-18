@@ -25,8 +25,8 @@ namespace ecs
 				Iterator(EntityManager &em, const ComponentManager::ComponentMask &compMask,
 						 ComponentPoolEntityCollection *compEntColl, ComponentPoolEntityCollection::Iterator compIt);
 				Iterator &operator++();
-				bool operator==(Iterator &other);
-				bool operator!=(Iterator &other);
+				bool operator==(const Iterator &other);
+				bool operator!=(const Iterator &other);
 				Entity operator*();
 			private:
 				EntityManager &em;
