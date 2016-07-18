@@ -1,5 +1,5 @@
 .PHONY: auto compile linux unix windows vs14 clean unit-tests \
-	integration-tests tests astyle dependencies
+	integration-tests tests astyle dependencies test-cmake
 
 auto: build unix compile
 
@@ -20,11 +20,14 @@ clean:
 build:
 	mkdir -p build
 
-unit-tests: build dependencies unix
+unit-tests: build test-cmake
 	cd build; make unit-tests
 
-integration-tests: build dependencies unix
+integration-tests: build test-cmake
 	cd build; make integration-tests
+
+test-cmake: build dependencies
+	cd build; cmake -G "Unix Makefiles" -DBUILD_TESTS=ON ..
 
 tests: unit-tests integration-tests
 

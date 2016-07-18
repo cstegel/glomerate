@@ -212,7 +212,13 @@ namespace ecs
 			components.at(compIndex) = validComponentPair;
 
 			// update the entity -> component index mapping of swapped component
-			entIndexToCompIndex.at(validComponentPair.first.Index()) = compIndex;
+			// if it's entity still exists
+			// (Entity could have been deleted while iterating over entities so the component was only soft-deleted till now)
+			uint64 entityIndex = validComponentPair.first.Index();
+			if (entIndexToCompIndex.count(entityIndex) > 0)
+			{
+				entIndexToCompIndex.at(entityIndex) = compIndex;
+			}
 		}
 
 		lastCompIndex--;

@@ -196,6 +196,37 @@ namespace test
 		}
 	}
 
+	/**
+	 * Tests that there is no error when deleting the current entity while
+	 * iterating over a set of entities
+	 */
+	TEST(EcsBugFix, DeleteEntityWhileIterating)
+	{
+		ecs::EntityManager em;
+		ecs::Entity ePos1 = em.NewEntity();
+		ecs::Entity ePos2 = em.NewEntity();
+
+		ePos1.Assign<Position>();
+		ePos2.Assign<Position>();
+
+		// exception is normally raised after exiting the loop
+		// (EntityCollection / iterate lock is destroyed which triggers a list of "soft deleted"
+		// components to be deleted for real)
+		try {
+			for (auto e : em.EntitiesWith<Position>())
+			{
+				e.Destroy();
+			}
+		}
+		catch (const std::out_of_range & ex)
+		{
+			// for some reason the std::out_of_range doesn't get caught and this block never runs,
+			// so if you come here from seeing the test receive an std::out_of_range it means the test failed
+			std::cerr << "Err: " << ex.what() << std::endl;
+			ASSERT_TRUE(false) << "bug has regressed";
+		}
+	}
+
 	TEST(EcsBasic, AddEntitiesWhileIterating)
 	{
 		ecs::EntityManager em;
