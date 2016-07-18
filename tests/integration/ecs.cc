@@ -236,15 +236,15 @@ namespace test
 	{
 		ecs::EntityManager em;
 
-		ecs::Entity ePos1 = em.NewEntity();
-		ePos1.Assign<Position>(1, 2);
-		ePos1.Remove<Position>();
+		ecs::Entity ent = em.NewEntity();
+		ecs::Handle<Position> positionComp;
 
-		ecs::Entity ePos2 = em.NewEntity();
-		ecs::Handle<Position> positionComp = ePos1.Assign<Position>(3, 4);
+		positionComp = ent.Assign<Position>(1, 2);
+		ASSERT_EQ(Position(1, 2), *positionComp) << "sanity check failed";
 
+		ent.Remove<Position>();
+		positionComp = ent.Assign<Position>(3, 4);
 		ASSERT_EQ(Position(3, 4), *positionComp) << "component values not properly set on creation";
-		ePos2.Assign<Position>();
 	}
 
 	TEST(EcsBasic, AddEntitiesWhileIterating)
