@@ -227,6 +227,26 @@ namespace test
 		}
 	}
 
+	/**
+	 * The situation is that a component is created with certain values and then deleted.
+	 * When a new component of the same type is created it was being assigned to the spot
+	 * of the old component without having its new values copied into place.
+	 */
+	TEST(EcsBugFix, DeleteThenAddComponentDoesNotHaveOldComponentValues)
+	{
+		ecs::EntityManager em;
+
+		ecs::Entity ePos1 = em.NewEntity();
+		ePos1.Assign<Position>(1, 2);
+		ePos1.Remove<Position>();
+
+		ecs::Entity ePos2 = em.NewEntity();
+		ecs::Handle<Position> positionComp = ePos1.Assign<Position>(3, 4);
+
+		ASSERT_EQ(Position(3, 4), *positionComp) << "component values not properly set on creation";
+		ePos2.Assign<Position>();
+	}
+
 	TEST(EcsBasic, AddEntitiesWhileIterating)
 	{
 		ecs::EntityManager em;

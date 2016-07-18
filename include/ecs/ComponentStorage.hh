@@ -159,7 +159,11 @@ namespace ecs
 
 		if (components.size() == newCompIndex)
 		{
-			components.push_back(std::pair<Entity::Id, CompType>(e, CompType(args...)));
+			components.emplace_back(e, CompType(args...));
+		}
+		else
+		{
+			components.at(newCompIndex).second = CompType(args...);
 		}
 
 		components.at(newCompIndex).first = e;
