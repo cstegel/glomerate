@@ -16,6 +16,7 @@ namespace ecs
 	class Handle
 	{
 	public:
+		Handle();
 		Handle(Entity::Id entityId, ComponentPool<CompType> *componentPool);
 		~Handle();
 
@@ -24,8 +25,14 @@ namespace ecs
 
 	private:
 		Entity::Id eId;
-		ComponentPool<CompType> *compPool;
+		ComponentPool<CompType> *compPool = nullptr;
 	};
+
+	template <typename CompType>
+	Handle<CompType>::Handle()
+		: eId(), compPool(nullptr)
+	{
+	}
 
 	template <typename CompType>
 	Handle<CompType>::Handle(Entity::Id entityId, ComponentPool<CompType> *componentPool)
@@ -41,12 +48,20 @@ namespace ecs
 	template <typename CompType>
 	CompType &Handle<CompType>::operator*() const
 	{
+		if (!compPool)
+		{
+			throw std::runtime_error("trying to dereference a null Handle!");
+		}
 		return *compPool->Get(eId);
 	}
 
 	template <typename CompType>
 	CompType *Handle<CompType>::operator->() const
 	{
+		if (!compPool)
+		{
+			throw std::runtime_error("trying to dereference a null Handle!");
+		}
 		return compPool->Get(eId);
 	}
 }
