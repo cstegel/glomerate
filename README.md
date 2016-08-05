@@ -17,7 +17,7 @@ Below is a very simple example of using the ECS.  For the full API, see Entity.h
 
 ```c++
 // glomerate's "include" dir must be on your project's include path
-#include "Ecs.hh"
+#include <Ecs.hh>
 
 #include <iostream>
 
