@@ -1,18 +1,26 @@
-.PHONY: auto compile linux unix windows vs14 clean unit-tests \
-	integration-tests tests astyle dependencies test-cmake
+.PHONY: auto compile linux windows clean unit-tests \
+	integration-tests tests astyle dependencies test-cmake \
+	unix-release unix-debug vs14-release vs14-debug debug release
 
-auto: build unix compile
+auto: release
 
-compile:
+debug: unix-debug compile
+release: unix-release compile
+
+compile: build
 	cd build; make -j5
 
-linux: unix
-unix: build
-	cd build; cmake -G "Unix Makefiles" ..
+linux: unix-release
+unix-release: build
+	cd build; cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+unix-debug: build
+	cd build; cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 
 windows: vs14
-vs14: build
-	cd build; cmake -G "Visual Studio 14" ..
+vs14-release: build
+	cd build; cmake -G "Visual Studio 14" -DCMAKE_BUILD_TYPE=Release ..
+vs14-debug: build
+	cd build; cmake -G "Visual Studio 14" -DCMAKE_BUILD_TYPE=Debug ..
 
 clean:
 	rm -rf build bin lib

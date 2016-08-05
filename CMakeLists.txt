@@ -1,4 +1,5 @@
-project(ecs)
+set(PROJECT glomerate)
+project(${PROJECT})
 set(CMAKE_MIN_VERSION 2.8)
 cmake_minimum_required(VERSION ${CMAKE_MIN_VERSION} FATAL_ERROR)
 
@@ -13,9 +14,13 @@ if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS /wd4800 /MP)
 endif()
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bin/Release)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib/Release)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/lib/Release)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/lib/Debug)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/lib/Debug)
 
 if (WIN32)
 	set(_SP_WIN32 1)
@@ -26,11 +31,11 @@ else()
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES Release)
-	message(STATUS "ecs target is Release")
+	message(STATUS "${PROJECT} target is Release")
 elseif (CMAKE_BUILD_TYPE MATCHES Debug)
-	message(STATUS "ecs target is Debug")
+	message(STATUS "${PROJECT} target is Debug")
 else()
-	message(STATUS "ecs target is default, using Debug")
+	message(STATUS "${PROJECT} target is default, using Debug")
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
