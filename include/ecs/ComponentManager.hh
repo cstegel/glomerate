@@ -5,7 +5,7 @@
 #include <bitset>
 #include <sstream>
 
-#include "Common.hh"
+#include "ecs/Common.hh"
 #include "Entity.hh"
 #include "ComponentStorage.hh"
 #include "UnrecognizedComponentType.hh"

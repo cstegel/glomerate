@@ -5,7 +5,7 @@
 #include <functional>
 #include <stdexcept>
 #include <sstream>
-#include "Common.hh"
+#include "ecs/Common.hh"
 #include "ComponentManager.hh"
 #include "Entity.hh"
 #include "Handle.hh"

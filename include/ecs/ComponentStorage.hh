@@ -5,7 +5,7 @@
 #include <queue>
 #include <iterator>
 #include <stdexcept>
-#include "Common.hh"
+#include "ecs/Common.hh"
 #include "Entity.hh"
 
 #define MAX_COMPONENTS 64

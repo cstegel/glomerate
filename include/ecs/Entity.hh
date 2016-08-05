@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ostream>
-#include "Common.hh"
+#include "ecs/Common.hh"
 
 namespace ecs
 {
