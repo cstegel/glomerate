@@ -43,8 +43,7 @@ include_directories(
 )
 
 
-# split into lib and exe so tests can link against lib
-set(PROJECT_LIB conglomerate)
+set(PROJECT_LIB glomerate)
 
 file(GLOB_RECURSE all_sources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc)
 list(REMOVE_DUPLICATES all_sources)
@@ -54,16 +53,16 @@ list(REMOVE_DUPLICATES all_headers)
 
 add_library(${PROJECT_LIB} ${all_sources} ${all_headers})
 set_target_properties(${PROJECT_LIB} PROPERTIES
-                      OUTPUT_NAME conglomerate
+                      OUTPUT_NAME glomerate
                       POSITION_INDEPENDENT_CODE ON)
 
 # Installations
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-	DESTINATION include/conglomerate
+	DESTINATION include/glomerate
 	PATTERN "internal" EXCLUDE
 )
 
-install(TARGETS conglomerate
+install(TARGETS ${PROJECT_LIB}
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib

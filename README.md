@@ -1,22 +1,22 @@
 # Overview
 
-Conglomerate is an Entity Component System (ECS) created with C++11.  It aims to provide a simple API with scalable performance.  
+Glomerate is an Entity Component System (ECS) created with C++11.  It aims to provide a simple API with scalable performance.  
 
 # Setup
 
-Conglomerate should build on Linux and Windows but has only currently been tested on Ubuntu 14.04.
+Glomerate should build on Linux and Windows but has only currently been tested on Ubuntu 14.04.
 
 If your project uses CMake you can simply include the CMakeLists.txt file in the root directory.  
 Otherwise, the project can be built by invoking "make" in the top level directory which serves as a wrapper to the CMake setup.
 
-The library will be compiled to "bin/Debug/libconglomerate.a" on linux by default.
+The library will be compiled to "bin/Release/libglomerate.a" on linux by default.
 
 # Example Usage
 
 Below is a very simple example of using the ECS.  For the full API, see Entity.hh and EntityManager.hh.  Other practical examples can be found in "tests/integration/ecs.cc".
 
 ```c++
-// conglomerate's "include" dir must be on your project's include path
+// glomerate's "include" dir must be on your project's include path
 #include "Ecs.hh"
 
 #include <iostream>
