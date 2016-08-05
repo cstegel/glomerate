@@ -1,6 +1,6 @@
 # Overview
 
-Glomerate is an Entity Component System (ECS) created with C++11.  It aims to provide a simple API with scalable performance.  
+Glomerate is a type-safe Entity Component System (ECS) created with C++11.  It aims to provide a simple API with scalable performance.  
 
 # Setup
 
