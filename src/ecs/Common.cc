@@ -12,7 +12,7 @@
 
 namespace ecs
 {
-	void Assert(bool condition, string message)
+	void Assert(bool condition, const string & message)
 	{
 #ifndef NDEBUG
 		if (!condition)

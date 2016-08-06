@@ -28,7 +28,7 @@ typedef int64_t int64;
 namespace ecs
 {
 	void Assert(bool condition);
-	void Assert(bool condition, string message);
+	void Assert(bool condition, const string & message);
 
 	class NonCopyable
 	{
