@@ -6,10 +6,10 @@
 #include <sstream>
 
 #include "ecs/Common.hh"
-#include "Entity.hh"
-#include "ComponentStorage.hh"
-#include "UnrecognizedComponentType.hh"
-#include "Handle.hh"
+#include "ecs/Entity.hh"
+#include "ecs/ComponentStorage.hh"
+#include "ecs/UnrecognizedComponentType.hh"
+#include "ecs/Handle.hh"
 
 #define MAX_COMPONENT_TYPES 64
 

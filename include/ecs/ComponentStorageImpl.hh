@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ecs/ComponentStorage.hh"
 
 namespace ecs

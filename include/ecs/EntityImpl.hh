@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Entity.hh"
-#include "EntityManager.hh"
-#include "Handle.hh"
+#include "ecs/Entity.hh"
+#include "ecs/EntityManager.hh"
+#include "ecs/Handle.hh"
 
 namespace ecs
 {
@@ -28,6 +28,31 @@ namespace ecs
 	Handle<CompType> Entity::Get()
 	{
 		return em->Get<CompType>(this->eid);
+	}
+
+	void Entity::Destroy()
+	{
+		em->Destroy(this->eid);
+	}
+
+	bool Entity::Valid() const
+	{
+		return em->Valid(this->eid);
+	}
+
+	void Entity::RemoveAllComponents()
+	{
+		em->RemoveAllComponents(this->eid);
+	}
+
+	EntityManager *Entity::GetManager()
+	{
+		return this->em;
+	}
+
+	Entity::Id Entity::GetId() const
+	{
+		return this->eid;
 	}
 }
 

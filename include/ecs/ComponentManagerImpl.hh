@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ecs/ComponentManager.hh"
 
 namespace ecs
