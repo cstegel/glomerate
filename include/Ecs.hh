@@ -14,4 +14,5 @@
 #include "ecs/CommonImpl.hh"
 #include "ecs/ComponentManagerImpl.hh"
 #include "ecs/ComponentStorageImpl.hh"
+#include "ecs/HandleImpl.hh"
 

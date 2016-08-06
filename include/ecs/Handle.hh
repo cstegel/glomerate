@@ -10,7 +10,7 @@ namespace ecs
 	 * since the actual memory address of a component may change at many
 	 * different times without the user of the ECS expecting it.
 	 *
-	 * Usage is similar to a pointer.
+	 * Usage is similar to a pointer (operator*() and operator->()).
 	 */
 	template <typename CompType>
 	class Handle
@@ -27,42 +27,5 @@ namespace ecs
 		Entity::Id eId;
 		ComponentPool<CompType> *compPool = nullptr;
 	};
-
-	template <typename CompType>
-	Handle<CompType>::Handle()
-		: eId(), compPool(nullptr)
-	{
-	}
-
-	template <typename CompType>
-	Handle<CompType>::Handle(Entity::Id entityId, ComponentPool<CompType> *componentPool)
-		: eId(entityId), compPool(componentPool)
-	{
-	}
-
-	template <typename CompType>
-	Handle<CompType>::~Handle()
-	{
-	}
-
-	template <typename CompType>
-	CompType &Handle<CompType>::operator*() const
-	{
-		if (!compPool)
-		{
-			throw std::runtime_error("trying to dereference a null Handle!");
-		}
-		return *compPool->Get(eId);
-	}
-
-	template <typename CompType>
-	CompType *Handle<CompType>::operator->() const
-	{
-		if (!compPool)
-		{
-			throw std::runtime_error("trying to dereference a null Handle!");
-		}
-		return compPool->Get(eId);
-	}
 }
 

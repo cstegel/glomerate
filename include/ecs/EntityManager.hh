@@ -66,7 +66,7 @@ namespace ecs
 		void Destroy(Entity::Id e);
 
 		/**
-		 * Check if the given entity is still valid in the system.
+		 * Check if the entity is still valid in the system.
 		 * An entity is invalid if it is not currently present in the system.
 		 * Since Entity::Id and Entity objects are often passed by value it is useful
 		 * to check if the underlying entity they represent is still valid before operating on them.
@@ -75,7 +75,7 @@ namespace ecs
 
 		/**
 		 * Construct a new component of type "CompType" with the given arguments
-		 * and attach it to the given entity.
+		 * and attach it to the entity.
 		 *
 		 * Returns a handle to the created component.
 		 */
@@ -83,13 +83,14 @@ namespace ecs
 		Handle<CompType> Assign(Entity::Id e, T... args);
 
 		/**
-		 * Remove the component of type "CompType" from the given entity
+		 * Remove the component of type "CompType" from this entity.
+		 * Throws an error if it doesn't have this component type.
 		 */
 		template <typename CompType>
 		void Remove(Entity::Id e);
 
 		/**
-		 * Remove all components that the given entity has
+		 * Remove all components from this entity.
 		 */
 		void RemoveAllComponents(Entity::Id e);
 
@@ -101,6 +102,7 @@ namespace ecs
 
 		/**
 		 * Get a handle to an entity's component of type "CompType"
+		 * Throws an error if it doesn't have a component of that type.
 		 */
 		template <typename CompType>
 		Handle<CompType> Get(Entity::Id e);
