@@ -25,6 +25,11 @@ typedef int32_t int32;
 typedef uint64_t uint64;
 typedef int64_t int64;
 
+#ifndef GLOMERATE_MAP_TYPE
+#include <unordered_map>
+#define GLOMERATE_MAP_TYPE std::unordered_map
+#endif
+
 namespace ecs
 {
 	void Assert(bool condition);

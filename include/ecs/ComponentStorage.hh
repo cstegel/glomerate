@@ -1,6 +1,5 @@
 #pragma once
 
-#include <unordered_map>
 #include <bitset>
 #include <queue>
 #include <iterator>
@@ -119,7 +118,7 @@ namespace ecs
 
 		vector<std::pair<Entity::Id, CompType> > components;
 		uint64 lastCompIndex;
-		std::unordered_map<uint64, uint64> entIndexToCompIndex;
+		GLOMERATE_MAP_TYPE<uint64, uint64> entIndexToCompIndex;
 		bool softRemoveMode;
 		std::queue<uint64> softRemoveCompIndexes;
 

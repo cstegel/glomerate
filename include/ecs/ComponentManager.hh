@@ -1,7 +1,6 @@
 #pragma once
 
 #include <typeindex>
-#include <unordered_map>
 #include <bitset>
 #include <sstream>
 
@@ -76,7 +75,7 @@ namespace ecs
 		// map the typeid(T) of a component type, T, to the "index" of that
 		// component type. Any time each component type stores info in a vector, this index
 		// will identify which component type it corresponds to
-		std::unordered_map<std::type_index, uint32> compTypeToCompIndex;
+		GLOMERATE_MAP_TYPE<std::type_index, uint32> compTypeToCompIndex;
 
 		// An entity's index gives a bitmask for the components that it has. If bitset[i] is set
 		// then it means this entity has the component with component index i
