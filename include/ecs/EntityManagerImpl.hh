@@ -131,7 +131,7 @@ namespace ecs
 				continue;
 			}
 
-			size_t compSize = static_cast<BaseComponentPool *>(compMgr.componentPools.at(i))->Size();
+			size_t compSize = compMgr.componentPools.at(i)->Size();
 
 			if (minSizeCompIndex == -1 || compSize < minSize)
 			{
@@ -140,7 +140,7 @@ namespace ecs
 			}
 		}
 
-		auto smallestCompPool = static_cast<BaseComponentPool *>(compMgr.componentPools.at(minSizeCompIndex));
+		auto smallestCompPool = compMgr.componentPools.at(minSizeCompIndex);
 
 		return EntityManager::EntityCollection(
 			*this,

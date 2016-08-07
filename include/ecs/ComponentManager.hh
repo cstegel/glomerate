@@ -69,10 +69,9 @@ namespace ecs
 		template <typename TypeId, typename ...OtherTypeIds>
 		ComponentMask &setMask(ComponentManager::ComponentMask &mask, const TypeId &stdTypeId, const OtherTypeIds &... stdTypeIds);
 
-		// it is REALLY a vector of ComponentPool<T>* where each pool is the storage
-		// for a different type of component.  I'm not sure of a type-safe way to store
-		// this while still allowing dynamic addition of new component types.
-		vector<void *> componentPools;
+		// vector of ComponentPool<T>* where each pool is the underlying storage
+		// for a different type of component.
+		vector<BaseComponentPool *> componentPools;
 
 		// map the typeid(T) of a component type, T, to the "index" of that
 		// component type. Any time each component type stores info in a vector, this index
