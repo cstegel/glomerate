@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 
 	for (ecs::Entity e : entityManager.EntitiesWith<Position>())
 	{
-		ecs::Handle<Position> position = e.Get<Position>();
+		auto position = e.Get<Position>(); // returns an ecs::Handle<Position>
 		std::cout << e
 		          << " has x: " << position->x
 		          << ", y: " << position-y
@@ -63,3 +63,18 @@ Output:
 Existing tests can be run on linux with "make tests" to run integration and unit tests or "make integration-tests" / "make unit-tests" to run the individual suites.
 
 googletest library is used to help with testing and it will automatically be cloned from github into the ```ext/``` directory when compiling the tests for the first time.
+
+# Performance
+
+By default, Glomerate uses std::unordered_map for storing indexes. On some
+platforms (in particular VC++), std::unordered_map performs poorly and should
+be replaced. This can be done by defining the GLOMERATE_MAP_TYPE macro before
+including any Glomerate header. For instance:
+
+```c++
+#include <boost/unordered_map.hpp>
+#define GLOMERATE_MAP_TYPE boost::unordered_map
+#include <Ecs.hh>
+```
+
+Any type with a similar interface can be used.
