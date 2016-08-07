@@ -4,6 +4,7 @@
 #include "ecs/Entity.hh"
 #include "ecs/Handle.hh"
 
+// EntityManager
 namespace ecs
 {
 	template <typename CompType, typename ...T>
@@ -148,7 +149,32 @@ namespace ecs
 			smallestCompPool->CreateIterateLock()
 		);
 	}
+}
 
+// EntityManager::EntityCollection
+namespace ecs
+{
+	inline EntityManager::EntityCollection::EntityCollection(EntityManager &em,
+			const ComponentManager::ComponentMask &compMask,
+			ComponentPoolEntityCollection compEntColl,
+			unique_ptr<BaseComponentPool::IterateLock> &&iLock)
+		: em(em), compMask(compMask), compEntColl(compEntColl), iLock(std::move(iLock))
+	{}
+
+	inline EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::begin()
+	{
+		return EntityManager::EntityCollection::Iterator(em, compMask, &compEntColl, compEntColl.begin());
+	}
+
+	inline EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::end()
+	{
+		return EntityManager::EntityCollection::Iterator(em, compMask, &compEntColl, compEntColl.end());
+	}
+}
+
+// EntityManager::EntityCollection::Iterator
+namespace ecs
+{
 	inline EntityManager::EntityCollection::Iterator::Iterator(EntityManager &em,
 			const ComponentManager::ComponentMask &compMask,
 			ComponentPoolEntityCollection *compEntColl,
@@ -187,7 +213,7 @@ namespace ecs
 	{
 		return compMask == other.compMask && compIt == other.compIt;
 	}
-	
+
 	inline bool EntityManager::EntityCollection::Iterator::operator!=(const Iterator &other)
 	{
 		return !(*this == other);
@@ -196,22 +222,5 @@ namespace ecs
 	inline Entity EntityManager::EntityCollection::Iterator::operator*()
 	{
 		return Entity(&this->em, *compIt);
-	}
-
-	inline EntityManager::EntityCollection::EntityCollection(EntityManager &em,
-			const ComponentManager::ComponentMask &compMask,
-			ComponentPoolEntityCollection compEntColl,
-			unique_ptr<BaseComponentPool::IterateLock> &&iLock)
-		: em(em), compMask(compMask), compEntColl(compEntColl), iLock(std::move(iLock))
-	{}
-
-	inline EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::begin()
-	{
-		return EntityManager::EntityCollection::Iterator(em, compMask, &compEntColl, compEntColl.begin());
-	}
-
-	inline EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::end()
-	{
-		return EntityManager::EntityCollection::Iterator(em, compMask, &compEntColl, compEntColl.end());
 	}
 }
