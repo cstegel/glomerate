@@ -144,7 +144,7 @@ namespace ecs
 		{
 			if (compMask[i])
 			{
-				static_cast<BaseComponentPool *>(componentPools.at(i))->Remove(e);
+				componentPools.at(i)->Remove(e);
 				compMask.reset(i);
 			}
 		}
