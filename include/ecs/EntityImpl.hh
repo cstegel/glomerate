@@ -7,36 +7,38 @@
 // Entity::Id
 namespace ecs
 {
-	uint64 Entity::Id::Index() const
+	inline uint64 Entity::Id::Index() const
 	{
 		return id & INDEX_MASK;
 	}
 
-	uint64 Entity::Id::Generation() const
+	inline uint64 Entity::Id::Generation() const
 	{
 		return (id >> INDEX_BITS);
 	}
 
-	bool Entity::Id::operator==(const Id &other) const
+	inline bool Entity::Id::operator==(const Id &other) const
 	{
 		return id == other.id;
 	}
-	bool Entity::Id::operator!=(const Id &other) const
+
+	inline bool Entity::Id::operator!=(const Id &other) const
 	{
 		return !(*this == other);
 	}
-	bool Entity::Id::operator<(const Id &other) const
+
+	inline bool Entity::Id::operator<(const Id &other) const
 	{
 		return this->id < other.id;
 	}
 
-	std::ostream &operator<<(std::ostream &os, const Entity::Id e)
+	inline std::ostream &operator<<(std::ostream &os, const Entity::Id e)
 	{
 		os << "(Index: " << e.Index() << ", Gen: " << e.Generation() << ")";
 		return os;
 	}
 
-	Entity::Id::Id(uint64 index, uint16 generation)
+	inline Entity::Id::Id(uint64 index, uint16 generation)
 	{
 		id = (static_cast<uint64>(generation) << INDEX_BITS) + index;
 		Assert((id & INDEX_MASK) == index);
@@ -46,34 +48,34 @@ namespace ecs
 // Entity
 namespace ecs
 {
-	Entity::Entity() : em(nullptr), eid()
+	inline Entity::Entity() : em(nullptr), eid()
 	{}
 
-	Entity::Entity(EntityManager *em, Entity::Id eid) : em(em), eid(eid)
+	inline Entity::Entity(EntityManager *em, Entity::Id eid) : em(em), eid(eid)
 	{}
 
-	bool Entity::operator==(const Entity &other) const
+	inline bool Entity::operator==(const Entity &other) const
 	{
 		return this->eid == other.eid && this->em == other.em;
 	}
 
-	bool Entity::operator!=(const Entity &other) const
+	inline bool Entity::operator!=(const Entity &other) const
 	{
 		return !(*this == other);
 	}
 
-	bool Entity::operator<(const Entity &other) const
+	inline bool Entity::operator<(const Entity &other) const
 	{
 		return this->eid < other.eid;
 	}
 
-	std::ostream &operator<<(std::ostream &os, const Entity e)
+	inline std::ostream &operator<<(std::ostream &os, const Entity e)
 	{
 		os << e.eid;
 		return os;
 	}
 
-	uint64 Entity::Index() const
+	inline uint64 Entity::Index() const
 	{
 		return eid.Index();
 	}
@@ -102,27 +104,27 @@ namespace ecs
 		return em->Get<CompType>(this->eid);
 	}
 
-	void Entity::Destroy()
+	inline void Entity::Destroy()
 	{
 		em->Destroy(this->eid);
 	}
 
-	bool Entity::Valid() const
+	inline bool Entity::Valid() const
 	{
 		return em->Valid(this->eid);
 	}
 
-	void Entity::RemoveAllComponents()
+	inline void Entity::RemoveAllComponents()
 	{
 		em->RemoveAllComponents(this->eid);
 	}
 
-	EntityManager *Entity::GetManager()
+	inline EntityManager *Entity::GetManager()
 	{
 		return this->em;
 	}
 
-	Entity::Id Entity::GetId() const
+	inline Entity::Id Entity::GetId() const
 	{
 		return this->eid;
 	}

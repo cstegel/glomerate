@@ -5,12 +5,12 @@
 // BaseComponentPool::IterateLock
 namespace ecs
 {
-	BaseComponentPool::IterateLock::IterateLock(BaseComponentPool &pool): pool(pool)
+	inline BaseComponentPool::IterateLock::IterateLock(BaseComponentPool &pool): pool(pool)
 	{
 		pool.toggleSoftRemove(true);
 	}
 
-	BaseComponentPool::IterateLock::~IterateLock()
+	inline BaseComponentPool::IterateLock::~IterateLock()
 	{
 		pool.toggleSoftRemove(false);
 	}
@@ -19,7 +19,7 @@ namespace ecs
 // ComponentPoolEntityCollection
 namespace ecs
 {
-	ComponentPoolEntityCollection::ComponentPoolEntityCollection(BaseComponentPool &pool)
+	inline ComponentPoolEntityCollection::ComponentPoolEntityCollection(BaseComponentPool &pool)
 		: pool(pool)
 	{
 		// keep track of the last component at creation time.  This way, if new components
@@ -27,12 +27,12 @@ namespace ecs
 		lastCompIndex = pool.Size() - 1;
 	}
 
-	ComponentPoolEntityCollection::Iterator ComponentPoolEntityCollection::begin()
+	inline ComponentPoolEntityCollection::Iterator ComponentPoolEntityCollection::begin()
 	{
 		return ComponentPoolEntityCollection::Iterator(pool, 0);
 	}
 
-	ComponentPoolEntityCollection::Iterator ComponentPoolEntityCollection::end()
+	inline ComponentPoolEntityCollection::Iterator ComponentPoolEntityCollection::end()
 	{
 		return ComponentPoolEntityCollection::Iterator(pool, lastCompIndex + 1);
 	}
@@ -41,11 +41,11 @@ namespace ecs
 // ComponentPoolEntityCollection::Iterator
 namespace ecs
 {
-	ComponentPoolEntityCollection::Iterator::Iterator(BaseComponentPool &pool, uint64 compIndex)
+	inline ComponentPoolEntityCollection::Iterator::Iterator(BaseComponentPool &pool, uint64 compIndex)
 		: pool(pool), compIndex(compIndex)
 	{}
 
-	ComponentPoolEntityCollection::Iterator &ComponentPoolEntityCollection::Iterator::operator++()
+	inline ComponentPoolEntityCollection::Iterator &ComponentPoolEntityCollection::Iterator::operator++()
 	{
 		compIndex++;
 		if (compIndex > pool.Size())
@@ -58,20 +58,20 @@ namespace ecs
 		return *this;
 	}
 
-	Entity::Id ComponentPoolEntityCollection::Iterator::operator*()
+	inline Entity::Id ComponentPoolEntityCollection::Iterator::operator*()
 	{
 		Assert(compIndex < pool.Size(),
 			"trying to access entity that is past the end of this component pool");
 		return pool.entityAt(compIndex);
 	}
 
-	bool ComponentPoolEntityCollection::Iterator::operator==(
+	inline bool ComponentPoolEntityCollection::Iterator::operator==(
 		const ComponentPoolEntityCollection::Iterator &other)
 	{
 		return compIndex == other.compIndex;
 	}
 
-	bool ComponentPoolEntityCollection::Iterator::operator!=(
+	inline bool ComponentPoolEntityCollection::Iterator::operator!=(
 		const ComponentPoolEntityCollection::Iterator &other)
 	{
 		return compIndex != other.compIndex;

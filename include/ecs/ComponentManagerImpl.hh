@@ -135,7 +135,7 @@ namespace ecs
 		return setMask(mask, stdTypeIds...);
 	}
 
-	void ComponentManager::RemoveAll(Entity::Id e)
+	inline void ComponentManager::RemoveAll(Entity::Id e)
 	{
 		Assert(entCompMasks.size() > e.Index(), "entity does not have a component mask");
 

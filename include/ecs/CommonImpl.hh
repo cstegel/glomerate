@@ -14,7 +14,7 @@
 
 namespace ecs
 {
-	void Assert(bool condition, const string & message)
+	inline void Assert(bool condition, const string & message)
 	{
 #ifndef NDEBUG
 		if (!condition)
@@ -28,7 +28,7 @@ namespace ecs
 #endif
 	}
 
-	void Assert(bool condition)
+	inline void Assert(bool condition)
 	{
 		return Assert(condition, "assertion failed");
 	}

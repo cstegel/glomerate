@@ -54,7 +54,7 @@ namespace ecs
 		return compMgr.SetMask<CompTypes...>(mask);
 	}
 
-	EntityManager::EntityManager()
+	inline EntityManager::EntityManager()
 	{
 		// entity 0 is reserved for the NULL Entity
 		nextEntityIndex = 1;
@@ -64,7 +64,7 @@ namespace ecs
 		entIndexToGen.push_back(0);
 	}
 
-	Entity EntityManager::NewEntity()
+	inline Entity EntityManager::NewEntity()
 	{
 		uint64 i;
 		uint16 gen;
@@ -93,7 +93,7 @@ namespace ecs
 		return Entity(this, Entity::Id(i, gen));
 	}
 
-	void EntityManager::Destroy(Entity::Id e)
+	inline void EntityManager::Destroy(Entity::Id e)
 	{
 		if (!Valid(e))
 		{
@@ -107,17 +107,17 @@ namespace ecs
 		freeEntityIndexes.push(e.Index());
 	}
 
-	bool EntityManager::Valid(Entity::Id e) const
+	inline bool EntityManager::Valid(Entity::Id e) const
 	{
 		return e.Generation() == entIndexToGen.at(e.Index());
 	}
 
-	void EntityManager::RemoveAllComponents(Entity::Id e)
+	inline void EntityManager::RemoveAllComponents(Entity::Id e)
 	{
 		compMgr.RemoveAll(e);
 	}
 
-	EntityManager::EntityCollection EntityManager::EntitiesWith(ComponentManager::ComponentMask compMask)
+	inline EntityManager::EntityCollection EntityManager::EntitiesWith(ComponentManager::ComponentMask compMask)
 	{
 		// find the smallest size component pool to iterate over
 		size_t minSize;
@@ -149,7 +149,7 @@ namespace ecs
 		);
 	}
 
-	EntityManager::EntityCollection::Iterator::Iterator(EntityManager &em,
+	inline EntityManager::EntityCollection::Iterator::Iterator(EntityManager &em,
 			const ComponentManager::ComponentMask &compMask,
 			ComponentPoolEntityCollection *compEntColl,
 			ComponentPoolEntityCollection::Iterator compIt)
@@ -168,7 +168,7 @@ namespace ecs
 		}
 	}
 
-	EntityManager::EntityCollection::Iterator &EntityManager::EntityCollection::Iterator::operator++()
+	inline EntityManager::EntityCollection::Iterator &EntityManager::EntityCollection::Iterator::operator++()
 	{
 		// find the next entity that has all the components specified by this->compMask
 		while (++compIt != compEntColl->end())
@@ -183,33 +183,34 @@ namespace ecs
 		return *this;
 	}
 
-	bool EntityManager::EntityCollection::Iterator::operator==(const Iterator &other)
+	inline bool EntityManager::EntityCollection::Iterator::operator==(const Iterator &other)
 	{
 		return compMask == other.compMask && compIt == other.compIt;
 	}
-	bool EntityManager::EntityCollection::Iterator::operator!=(const Iterator &other)
+	
+	inline bool EntityManager::EntityCollection::Iterator::operator!=(const Iterator &other)
 	{
 		return !(*this == other);
 	}
 
-	Entity EntityManager::EntityCollection::Iterator::operator*()
+	inline Entity EntityManager::EntityCollection::Iterator::operator*()
 	{
 		return Entity(&this->em, *compIt);
 	}
 
-	EntityManager::EntityCollection::EntityCollection(EntityManager &em,
+	inline EntityManager::EntityCollection::EntityCollection(EntityManager &em,
 			const ComponentManager::ComponentMask &compMask,
 			ComponentPoolEntityCollection compEntColl,
 			unique_ptr<BaseComponentPool::IterateLock> &&iLock)
 		: em(em), compMask(compMask), compEntColl(compEntColl), iLock(std::move(iLock))
 	{}
 
-	EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::begin()
+	inline EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::begin()
 	{
 		return EntityManager::EntityCollection::Iterator(em, compMask, &compEntColl, compEntColl.begin());
 	}
 
-	EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::end()
+	inline EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::end()
 	{
 		return EntityManager::EntityCollection::Iterator(em, compMask, &compEntColl, compEntColl.end());
 	}
