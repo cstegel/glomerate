@@ -23,7 +23,7 @@ Below is a very simple example of using the ECS.  For the full API, see Entity.h
 
 struct Position {
 	Position() {}
-	Position(float x, y, z) : x(x), y(y), z(z) {}
+	Position(float x, float y, float z) : x(x), y(y), z(z) {}
 	float x, y, z;
 };
 
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 		ecs::Handle<Position> position = e.Get<Position>();
 		std::cout << e
 		          << " has x: " << position->x
-		          << ", y: " << position-y
+		          << ", y: " << position->y
 		          << ", z: " << position->z
 		          << std::endl;
 	}
