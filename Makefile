@@ -2,25 +2,7 @@
 	integration-tests tests astyle dependencies test-cmake \
 	unix-release unix-debug vs14-release vs14-debug debug release
 
-auto: release
-
-debug: unix-debug compile
-release: unix-release compile
-
-compile: build
-	cd build; make -j5
-
-linux: unix-release
-unix-release: build
-	cd build; cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-unix-debug: build
-	cd build; cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
-
-windows: vs14
-vs14-release: build
-	cd build; cmake -G "Visual Studio 14" -DCMAKE_BUILD_TYPE=Release ..
-vs14-debug: build
-	cd build; cmake -G "Visual Studio 14" -DCMAKE_BUILD_TYPE=Debug ..
+auto: tests
 
 clean:
 	rm -rf build bin lib

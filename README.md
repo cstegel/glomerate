@@ -1,15 +1,15 @@
 # Overview
 
-Glomerate is a type-safe Entity Component System (ECS) created with C++11.  It aims to provide a simple API with scalable performance.  
+Glomerate is a header-only, type-safe Entity Component System (ECS) created with C++11.  It aims to provide a simple API with scalable performance.  
 
 # Setup
 
-Glomerate should build on Linux and Windows but has only currently been tested on Ubuntu 14.04.
+Glomerate is a header-only library with no external dependencies (outside of testing) so all you need to do to use it is the following:
 
-If your project uses CMake you can simply include the CMakeLists.txt file in the root directory.  
-Otherwise, the project can be built by invoking "make" in the top level directory which serves as a wrapper to the CMake setup.
+  1. add Glomerate's ```include``` directory onto your include path when compiling your project.
+  2. ```#include <Ecs.hh>``` in any files you wish to use the library
 
-The library will be compiled to "bin/Release/libglomerate.a" on linux by default.
+It should work on any OS when using a C++11 compliant compiler.
 
 # Example Usage
 
@@ -60,6 +60,6 @@ Output:
 
 # Tests
 
-Existing tests can be run with "make tests" to run integration and unit tests or "make integration-tests" / "make unit-tests" to run the individual suites.
+Existing tests can be run on linux with "make tests" to run integration and unit tests or "make integration-tests" / "make unit-tests" to run the individual suites.
 
-googletest library is used to help with testing.
+googletest library is used to help with testing and it will automatically be cloned from github into the ```ext/``` directory when compiling the tests for the first time.
