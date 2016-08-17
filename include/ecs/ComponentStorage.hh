@@ -64,7 +64,7 @@ namespace ecs
 
 		virtual void Remove(Entity::Id e) = 0;
 		virtual bool HasComponent(Entity::Id e) const = 0;
-		virtual size_t Size() const = 0;
+		virtual uint64 Size() const = 0;
 		virtual ComponentPoolEntityCollection Entities() = 0;
 
 		// as long as the resultant lock is not destroyed, the order that iteration occurs
@@ -108,7 +108,7 @@ namespace ecs
 		CompType *Get(Entity::Id e);
 		void Remove(Entity::Id e) override;
 		bool HasComponent(Entity::Id e) const override;
-		size_t Size() const override;
+		uint64 Size() const override;
 		ComponentPoolEntityCollection Entities() override;
 
 		unique_ptr<BaseComponentPool::IterateLock> CreateIterateLock() override;

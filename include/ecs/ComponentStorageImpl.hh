@@ -192,7 +192,7 @@ namespace ecs
 	}
 
 	template <typename CompType>
-	size_t ComponentPool<CompType>::Size() const
+	uint64 ComponentPool<CompType>::Size() const
 	{
 		return lastCompIndex + 1;
 	}

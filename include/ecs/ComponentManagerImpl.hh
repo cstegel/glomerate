@@ -4,6 +4,11 @@
 
 namespace ecs
 {
+	inline size_t ComponentManager::ComponentTypeCount() const
+	{
+		return componentPools.size();
+	}
+
 	template <typename CompType, typename ...T>
 	Handle<CompType> ComponentManager::Assign(Entity::Id e, T... args)
 	{

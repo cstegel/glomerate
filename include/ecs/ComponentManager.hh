@@ -35,10 +35,7 @@ namespace ecs
 		template <typename CompType>
 		Handle<CompType> Get(Entity::Id e);
 
-		size_t ComponentTypeCount() const
-		{
-			return componentPools.size();
-		}
+		size_t ComponentTypeCount() const;
 
 		template <typename ...CompTypes>
 		ComponentMask &SetMask(ComponentMask &mask);
