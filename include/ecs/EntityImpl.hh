@@ -111,7 +111,7 @@ namespace ecs
 
 	inline bool Entity::Valid() const
 	{
-		return em->Valid(this->eid);
+		return em && em->Valid(this->eid);
 	}
 
 	inline void Entity::RemoveAllComponents()
