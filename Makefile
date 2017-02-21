@@ -23,10 +23,12 @@ integration-tests-32: build test-cmake-32
 	cd build; make integration-tests_32
 
 test-cmake: build dependencies
-	cd build; cmake -G "Unix Makefiles" -DBUILD_TESTS=ON -DFORCE_32BIT=0 ..
+	cd build; cmake -G "Unix Makefiles" -DBUILD_TESTS=ON -DFORCE_32BIT=0 \
+		-DCMAKE_BUILD_TYPE=Debug ..
 
 test-cmake-32: build dependencies
-	cd build; cmake -G "Unix Makefiles" -DBUILD_TESTS=ON -DFORCE_32BIT=1 ..
+	cd build; cmake -G "Unix Makefiles" -DBUILD_TESTS=ON -DFORCE_32BIT=1 \
+		-DCMAKE_BUILD_TYPE=Debug ..
 
 tests: unit-tests integration-tests
 

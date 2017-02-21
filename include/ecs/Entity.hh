@@ -118,6 +118,26 @@ namespace ecs
 		template <typename CompType>
 		Handle<CompType> Get();
 
+		/**
+		 * Register @callback to be called when an event of type Event
+		 * occurs on this Entity.
+		 */
+		template <typename Event>
+		void Subscribe(std::function<void(Entity, const Event &)> callback);
+
+		/**
+		 * Unregister @callback for this type of Event. Throws a runtime_error
+		 * if it was never registered in the first place.
+		 */
+		template <typename Event>
+		void Unsubscribe(std::function<void(Entity, const Event &)> callback);
+
+		/**
+		 * Emit an Event on this Entity that associate subscribers will see.
+		 */
+		template <typename Event>
+		void Emit(const Event &event);
+
 	private:
 		EntityManager *em;
 		Entity::Id eid;

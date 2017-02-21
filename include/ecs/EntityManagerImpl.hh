@@ -149,6 +149,103 @@ namespace ecs
 			smallestCompPool->CreateIterateLock()
 		);
 	}
+
+	template <typename Event>
+	void EntityManager::registerEventType()
+	{
+		typedef std::function<void(Entity, const Event &)> Callback;
+		std::type_index eventType = typeid(Event);
+
+		if (eventTypeToEventIndex.count(eventType) != 0)
+		{
+			std::stringstream ss;
+			ss << "event type " << string(eventType.name())
+			   << " is already registered";
+			throw std::runtime_error(ss.str());
+		}
+
+		uint32 eventIndex = eventSubscribers.size();
+		eventTypeToEventIndex[eventType] = eventIndex;
+		auto callbackVector = new vector<Callback>();
+		// TODO: deallocate on destruction
+
+		// static_cast doesn't seem to work between ptr to vector types
+		auto genericCallbackVector =
+			reinterpret_cast<vector<std::function<void(Entity, void *)>> *>(callbackVector);
+		eventSubscribers.push_back(genericCallbackVector);
+	}
+
+	template <typename Event>
+	void EntityManager::Subscribe(std::function<void(Entity, const Event &)> callback)
+	{
+		typedef std::function<void(Entity, const Event &)> Callback;
+		std::type_index eventType = typeid(Event);
+
+		uint32 eventIndex;
+
+		try
+		{
+			eventIndex = eventTypeToEventIndex.at(eventType);
+		}
+		// Event never seen before, add it to the collection
+		catch (const std::out_of_range &e)
+		{
+			registerEventType<Event>();
+			eventIndex = eventTypeToEventIndex.at(eventType);
+		}
+
+		// static_cast doesn't seem to work between ptr to vector types
+		auto subscribers =
+			reinterpret_cast<vector<Callback> *>(eventSubscribers.at(eventIndex));
+		subscribers->push_back(callback);
+	}
+
+	template <typename Event>
+	void EntityManager::Subscribe(
+		std::function<void(Entity, const Event &e)> callback,
+		Entity entity)
+	{
+		// TODO
+	}
+
+	template <typename Event>
+	void EntityManager::Unsubscribe(
+		std::function<void(Entity, const Event &e)> callback)
+	{
+		// TODO
+	}
+
+	template <typename Event>
+	void EntityManager::Unsubscribe(
+		std::function<void(Entity, const Event &e)> callback,
+		Entity entity)
+	{
+		// TODO
+	}
+
+	template <typename Event>
+	void EntityManager::
+		Emit(Entity::Id e, const Event &event)
+	{
+		typedef std::function<void(Entity, const Event &)> Callback;
+
+		std::type_index eventType = typeid(Event);
+		if (eventTypeToEventIndex.count(eventType) == 0)
+		{
+			// This event type has never been seen before
+			return;
+		}
+
+		auto eventIndex = eventTypeToEventIndex.at(eventType);
+
+		// static_cast doesn't seem to work between ptr to vector types
+		auto subscribers =
+			reinterpret_cast<vector<Callback> *>(eventSubscribers.at(eventIndex));
+
+		for (Callback callback : *subscribers) {
+			callback(Entity(this, e), event);
+		}
+	}
 }
 
 // EntityManager::EntityCollection

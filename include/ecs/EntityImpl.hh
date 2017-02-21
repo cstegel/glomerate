@@ -143,6 +143,24 @@ namespace ecs
 	{
 		return this->eid;
 	}
+
+	template <typename Event>
+	void Entity::Subscribe(std::function<void(Entity, const Event &)> callback)
+	{
+		// TODO
+	}
+
+	template <typename Event>
+	void Entity::Unsubscribe(std::function<void(Entity, const Event &)> callback)
+	{
+		// TODO
+	}
+
+	template <typename Event>
+	void Entity::Emit(const Event &event)
+	{
+		em->Emit(this->eid, event);
+	}
 }
 
 namespace std

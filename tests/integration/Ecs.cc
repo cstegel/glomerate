@@ -132,7 +132,7 @@ namespace test
 		}
 
 		EXPECT_TRUE(entsFound.count(ePosEat) == 1 && entsFound[ePosEat] == true);
-		EXPECT_EQ(1, entsFound.size()) << "should have only found one entity";
+		EXPECT_EQ(1u, entsFound.size()) << "should have only found one entity";
 	}
 
 	TEST_F(EcsBasicIterateWithComponents, TemplateIteration)

@@ -5,6 +5,8 @@
 #include <functional>
 #include <stdexcept>
 #include <sstream>
+#include <functional>
+
 #include "ecs/Common.hh"
 #include "ComponentManager.hh"
 #include "Entity.hh"
@@ -161,6 +163,43 @@ namespace ecs
 		 */
 		EntityCollection EntitiesWith(ComponentManager::ComponentMask compMask);
 
+		/**
+		 * Register @callback to be called whenever an event of type Event
+		 * occurs on ANY Entity.
+		 */
+		template <typename Event>
+		void Subscribe(std::function<void(Entity, const Event &e)> callback);
+
+		/**
+		 * Register @callback to be called whenever an event of type Event
+		 * occurs on @entity.
+		 */
+		template <typename Event>
+		void Subscribe(std::function<void(Entity, const Event &e)> callback,
+		               Entity entity);
+
+		/**
+		 * Unregister @callback for this type of Event. Throws a runtime_error
+		 * if it was never registered in the first place.
+		 */
+		template <typename Event>
+		void Unsubscribe(std::function<void(Entity, const Event &e)> callback);
+
+		/**
+		 * Unregister @callback for this type of Event on @entity.
+		 * Throws a runtime_error if it was never registered in the first place.
+		 */
+		template <typename Event>
+		void Unsubscribe(std::function<void(Entity, const Event &e)> callback,
+		               Entity entity);
+
+		/**
+		 * Emit an event associated with the given entity. This will trigger
+		 * any callbacks that have subscribed to this kind of event.
+		 */
+		template <typename Event>
+		void Emit(Entity::Id e, const Event &event);
+
 	private:
 
 		static const size_t RECYCLE_ENTITY_COUNT = 2048;
@@ -170,5 +209,26 @@ namespace ecs
 		std::queue<uint64> freeEntityIndexes;
 		uint64 nextEntityIndex;
 		ComponentManager compMgr;
+
+		// eventSubscribers[i] are all the subscribers to Event "event",
+		// where i = type_index(typeid(event))
+		//
+		// the function type actually is the following:
+		// template <typename Event>
+		// std::function<void(Entity, const Event &)>
+		vector<vector<std::function<void(Entity, void *)>> *> eventSubscribers;
+
+		// map the typeid(T) of a Event type, T, to the "index" of that
+		// event type. Any time a subscriber to an event is added to a vector,
+		// it will be added to the sub-vector at this index.
+		GLOMERATE_MAP_TYPE<std::type_index, uint32> eventTypeToEventIndex;
+
+		/**
+		 * Allocates storage space for subscribers for a new type of Event.
+		 * Should only ever be called once when the first of this Event type
+		 * is seen.
+		 */
+		template <typename Event>
+		void registerEventType();
 	};
 };
