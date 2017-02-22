@@ -121,6 +121,24 @@ namespace test
 			<< "subscriber was not triggered for all entities";
 	}
 
+	TEST_F(EcsEvents, ReceiveEventForAllEntitiesWithLambdasAndFunctors)
+	{
+		HitReceiver hitReceiver;
+		em.Subscribe<Hit>(hitReceiver);
+
+		bool rekt = false;
+		em.Subscribe<Hit>([&rekt](ecs::Entity, const Hit &h) {
+			rekt = true;
+		});
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+
+		EXPECT_EQ(8, player1.Get<Character>()->health)
+			<< "functor was not triggered";
+
+		EXPECT_TRUE(rekt) << "lambda was not triggered";
+	}
+
 	// TEST_F(EcsEvents, MultiReceiveEventForSingleEntity)
 	// {
 	// 	// player1 gets hit twice per Hit event
