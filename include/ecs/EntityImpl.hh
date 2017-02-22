@@ -83,29 +83,41 @@ namespace ecs
 	template <typename CompType, typename ...T>
 	Handle<CompType> Entity::Assign(T... args)
 	{
+		if (em == nullptr) {
+			throw runtime_error("Cannot assign component to NULL Entity");
+		}
 		return em->Assign<CompType>(this->eid, args...);
 	}
 
 	template <typename CompType>
 	void Entity::Remove()
 	{
+		if (em == nullptr) {
+			throw runtime_error("Cannot remove component from NULL Entity");
+		}
 		em->Remove<CompType>(this->eid);
 	}
 
 	template <typename CompType>
 	bool Entity::Has() const
 	{
-		return em->Has<CompType>(this->eid);
+		return (em != nullptr) && em->Has<CompType>(this->eid);
 	}
 
 	template <typename CompType>
 	Handle<CompType> Entity::Get()
 	{
+		if (em == nullptr) {
+			throw runtime_error("NULL entity has no components");
+		}
 		return em->Get<CompType>(this->eid);
 	}
 
 	inline void Entity::Destroy()
 	{
+		if (em == nullptr) {
+			return;
+		}
 		em->Destroy(this->eid);
 	}
 
@@ -116,6 +128,9 @@ namespace ecs
 
 	inline void Entity::RemoveAllComponents()
 	{
+		if (em == nullptr) {
+			return;
+		}
 		em->RemoveAllComponents(this->eid);
 	}
 
