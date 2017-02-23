@@ -54,7 +54,17 @@ namespace test
 		void operator()(ecs::Entity e, const Hit &hit)
 		{
 			e.Get<Character>()->health -= hit.weapon->damage;
+			totalDamage += hit.weapon->damage;
+			totalDamageSq = totalDamage * totalDamage;
 		}
+
+		int totalDamage = 0;
+		int totalDamageSq = 0;
+		double a;
+		double b;
+		double c;
+		double d;
+		double e;
 	};
 
 	class EcsEvents : public ::testing::Test
@@ -137,6 +147,57 @@ namespace test
 			<< "functor was not triggered";
 
 		EXPECT_TRUE(rekt) << "lambda was not triggered";
+	}
+
+	/**
+	 * Test that multiple large functors can be stored and called properly
+	 * without any of their values overwritten. Internally, callbacks
+	 * are stored in a vector<std::function<void(Entity, const Event &)>>
+	 * and std::function seems to always be 32 bytes so this likely isn't
+	 * ever going to be a problem. It would only be a problem if std::function
+	 * could be different sizes.
+	 */
+	TEST_F(EcsEvents, ReceiveEventForAllEntitiesWithLargeFunctors)
+	{
+		class Functor1 {
+		public:
+			void operator()(ecs::Entity e, const Hit &unused) {
+				for (int64 &x : nums) {
+					x += 1;
+				}
+			}
+			std::array<int64, 32> nums = {0};
+		};
+
+		class Functor2 {
+		public:
+			void operator()(ecs::Entity e, const Hit &unused) {
+				for (int64 &x : nums) {
+					x += 2;
+				}
+			}
+			std::array<int64, 16> nums = {0};
+		};
+
+		auto f1a = Functor1();
+		auto f2  = Functor2();
+		auto f1b = Functor1();
+
+		em.Subscribe<Hit>(std::ref(f1a));
+		em.Subscribe<Hit>(std::ref(f2));
+		em.Subscribe<Hit>(std::ref(f1b));
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+
+		for (auto x : f1a.nums) {
+			EXPECT_EQ(1, x);
+		}
+		for (auto x : f2.nums) {
+			EXPECT_EQ(2, x);
+		}
+		for (auto x : f1b.nums) {
+			EXPECT_EQ(1, x);
+		}
 	}
 
 	// TEST_F(EcsEvents, MultiReceiveEventForSingleEntity)
@@ -222,15 +283,46 @@ namespace test
 	// 		<< "subscriber was triggered after it unsubscribed";
 	// }
 	//
-	// TEST_F(EcsEvents, UnsubscribeFromAllEntitiesEvent)
-	// {
-	// 	HitReceiver hitReceiver;
-	// 	em.Subscribe<Hit>(hitReceiver);
-	// 	em.Unsubscribe<Hit>(hitReceiver);
-	//
-	// 	player1.Emit(Hit(player2.Get<Weapon>()));
-	//
-	// 	ASSERT_EQ(10, player1.Get<Character>().health)
-	// 		<< "subscriber was triggered after it unsubscribed";
-	// }
+	TEST_F(EcsEvents, UnsubscribeFromAllEntitiesEvent)
+	{
+		HitReceiver hitReceiver;
+		ecs::SubId id = em.Subscribe<Hit>(hitReceiver);
+		em.Unsubscribe<Hit>(id);
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+
+		ASSERT_EQ(10, player1.Get<Character>()->health)
+			<< "subscriber was triggered after it unsubscribed";
+	}
+
+	/**
+	 * Context: There are 2 subscribers for an event which has just been
+	 * triggered.
+	 *
+	 * If the 1st subscriber unsubscribes we need to ensure the 2nd one is still
+	 * called. This might not happen when we just do a "swap-to-back and delete"
+	 * approach to removing a subscriber. This should be handled similar to
+	 * deleting components while iterating over them where they are flagged for
+	 * deletion and then only do the swap-delete after we are done iterating
+	 * over subscribers.
+	 */
+	TEST_F(EcsEvents, UnsubscribeFromAllEntitiesEventDoesNotCauseOtherSubscribersToMissAnEvent)
+	{
+		bool triggered1 = false;
+		bool triggered2 = false;
+
+		ecs::SubId id1 = em.Subscribe<bool>([&](ecs::Entity e, bool unused){
+			triggered1 = true;
+			em.Unsubscribe<bool>(id1);
+		});
+
+		em.Subscribe<bool>([&](ecs::Entity e, bool unused){
+			triggered2 = true;
+		});
+
+		player1.Emit(true);
+
+		EXPECT_TRUE(triggered1);
+		EXPECT_TRUE(triggered2);
+	}
 }

@@ -15,6 +15,11 @@
 
 namespace ecs
 {
+	/**
+	 * Identifies a subscriber. See EntityManager::Subscribe() methods.
+	 */
+	typedef uint32 SubId;
+
 	class EntityManager
 	{
 	public:
@@ -168,14 +173,14 @@ namespace ecs
 		 * occurs on ANY Entity.
 		 */
 		template <typename Event>
-		void Subscribe(std::function<void(Entity, const Event &e)> callback);
+		SubId Subscribe(std::function<void(Entity, const Event &e)> callback);
 
 		/**
 		 * Register @callback to be called whenever an event of type Event
 		 * occurs on @entity.
 		 */
 		template <typename Event>
-		void Subscribe(std::function<void(Entity, const Event &e)> callback,
+		SubId Subscribe(std::function<void(Entity, const Event &e)> callback,
 		               Entity entity);
 
 		/**
@@ -183,15 +188,14 @@ namespace ecs
 		 * if it was never registered in the first place.
 		 */
 		template <typename Event>
-		void Unsubscribe(std::function<void(Entity, const Event &e)> callback);
+		void Unsubscribe(SubId id);
 
 		/**
 		 * Unregister @callback for this type of Event on @entity.
 		 * Throws a runtime_error if it was never registered in the first place.
 		 */
 		template <typename Event>
-		void Unsubscribe(std::function<void(Entity, const Event &e)> callback,
-		               Entity entity);
+		void Unsubscribe(SubId id, Entity entity);
 
 		/**
 		 * Emit an event associated with the given entity. This will trigger
@@ -216,7 +220,8 @@ namespace ecs
 		// the function type actually is the following:
 		// template <typename Event>
 		// std::function<void(Entity, const Event &)>
-		vector<vector<std::function<void(Entity, void *)>> *> eventSubscribers;
+		typedef vector<std::function<void(Entity, void *)>> CallbackVector;
+		vector<CallbackVector> eventSubscribers;
 
 		// map the typeid(T) of a Event type, T, to the "index" of that
 		// event type. Any time a subscriber to an event is added to a vector,
@@ -230,5 +235,16 @@ namespace ecs
 		 */
 		template <typename Event>
 		void registerEventType();
+
+		/**
+		 * Given the index in this->eventSubscribers, return
+		 * this->eventSubscribers.at(eventIndex) with the functions casted to
+		 * the proper calling type. This performs a reinterpret_cast to convert
+		 * the vector of function<void(Entity, void *)> but this is okay
+		 * because different std::function call signatures have the same size.
+		 */
+		template <typename Event>
+		vector<std::function<void(Entity, const Event &)>> *getSubscribers(
+			uint32 eventIndex);
 	};
 };

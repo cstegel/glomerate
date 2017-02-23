@@ -153,7 +153,6 @@ namespace ecs
 	template <typename Event>
 	void EntityManager::registerEventType()
 	{
-		typedef std::function<void(Entity, const Event &)> Callback;
 		std::type_index eventType = typeid(Event);
 
 		if (eventTypeToEventIndex.count(eventType) != 0)
@@ -166,19 +165,12 @@ namespace ecs
 
 		uint32 eventIndex = eventSubscribers.size();
 		eventTypeToEventIndex[eventType] = eventIndex;
-		auto callbackVector = new vector<Callback>();
-		// TODO: deallocate on destruction
-
-		// static_cast doesn't seem to work between ptr to vector types
-		auto genericCallbackVector =
-			reinterpret_cast<vector<std::function<void(Entity, void *)>> *>(callbackVector);
-		eventSubscribers.push_back(genericCallbackVector);
+		eventSubscribers.push_back({});
 	}
 
 	template <typename Event>
-	void EntityManager::Subscribe(std::function<void(Entity, const Event &)> callback)
+	SubId EntityManager::Subscribe(std::function<void(Entity, const Event &)> callback)
 	{
-		typedef std::function<void(Entity, const Event &)> Callback;
 		std::type_index eventType = typeid(Event);
 
 		uint32 eventIndex;
@@ -194,33 +186,62 @@ namespace ecs
 			eventIndex = eventTypeToEventIndex.at(eventType);
 		}
 
-		// static_cast doesn't seem to work between ptr to vector types
-		auto subscribers =
-			reinterpret_cast<vector<Callback> *>(eventSubscribers.at(eventIndex));
+		auto subscribers = getSubscribers<Event>(eventIndex);
 		subscribers->push_back(callback);
+
+		// index of where the subscriber was stored
+		return SubId(subscribers->size() - 1);
 	}
 
 	template <typename Event>
-	void EntityManager::Subscribe(
+	SubId EntityManager::Subscribe(
 		std::function<void(Entity, const Event &e)> callback,
 		Entity entity)
 	{
 		// TODO
+		throw runtime_error("not implemented");
+		return SubId(0);
 	}
 
 	template <typename Event>
-	void EntityManager::Unsubscribe(
-		std::function<void(Entity, const Event &e)> callback)
+	void EntityManager::Unsubscribe(SubId id)
 	{
-		// TODO
+		std::type_index eventType = typeid(Event);
+
+		uint32 eventIndex;
+
+		try
+		{
+			eventIndex = eventTypeToEventIndex.at(eventType);
+		}
+		catch (const std::out_of_range &e)
+		{
+			std::stringstream ss;
+			ss << "Cannot unsubscribe from non-existant Event type '"
+			   << eventType.name() << "'";
+			throw std::runtime_error(ss.str());
+		}
+
+		auto subscribers = getSubscribers<Event>(eventIndex);
+		// TODO: mark as deleted then in Emit() after broadcast is done go
+		// through and remove the callbacks
 	}
 
 	template <typename Event>
-	void EntityManager::Unsubscribe(
-		std::function<void(Entity, const Event &e)> callback,
-		Entity entity)
+	void EntityManager::Unsubscribe(SubId id, Entity entity)
 	{
 		// TODO
+		throw runtime_error("not implemented");
+	}
+
+	template <typename Event>
+	vector<std::function<void(Entity, const Event &)>> *
+	EntityManager::getSubscribers(uint32 eventIndex)
+	{
+		// reinterpret_cast is okay here since only difference is the
+		// call signature of the stored functions, which does not affect size
+		typedef std::function<void(Entity, const Event &)> Callback;
+		return reinterpret_cast<vector<Callback> *>(&eventSubscribers.at(eventIndex));
 	}
 
 	template <typename Event>
@@ -237,12 +258,9 @@ namespace ecs
 		}
 
 		auto eventIndex = eventTypeToEventIndex.at(eventType);
+		auto subscribers = getSubscribers<Event>(eventIndex);
 
-		// static_cast doesn't seem to work between ptr to vector types
-		auto subscribers =
-			reinterpret_cast<vector<Callback> *>(eventSubscribers.at(eventIndex));
-
-		for (Callback callback : *subscribers) {
+		for (Callback &callback : *subscribers) {
 			callback(Entity(this, e), event);
 		}
 	}
