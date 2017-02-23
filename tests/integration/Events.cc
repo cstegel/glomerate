@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include <boost/signals2.hpp>
 
 #include "Ecs.hh"
 
@@ -198,6 +199,18 @@ namespace test
 		for (auto x : f1b.nums) {
 			EXPECT_EQ(1, x);
 		}
+	}
+
+	// ensure that boost::signals2 works
+	TEST(EcsEventsBoost, Signals)
+	{
+		boost::signals2::signal<void ()> sig;
+
+		sig.connect([](){
+			std::cout << "Hello world!" << std::endl;
+		});
+
+		sig();
 	}
 
 	// TEST_F(EcsEvents, MultiReceiveEventForSingleEntity)
