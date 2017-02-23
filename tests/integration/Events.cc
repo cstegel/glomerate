@@ -1,5 +1,7 @@
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include <boost/signals2.hpp>
+
+#include <functional>
 
 #include "Ecs.hh"
 
@@ -38,16 +40,16 @@ namespace test
 		ecs::Handle<Weapon> weapon;
 	};
 
-	// class Gravedigger
-	// {
-	// public:
-	// 	void operator()(ecs::Entity e, const ecs::EntityDestroyed &d)
-	// 	{
-	// 		gravesDug += 1;
-	// 	}
-	//
-	// 	int gravesDug = 0;
-	// };
+	class Gravedigger
+	{
+	public:
+		void operator()(ecs::Entity e, const ecs::EntityDestroyed &d)
+		{
+			gravesDug += 1;
+		}
+
+		int gravesDug = 0;
+	};
 
 	class HitReceiver
 	{
@@ -87,35 +89,35 @@ namespace test
 		}
 	};
 
-	// TEST_F(EcsEvents, ReceiveEventForSingleEntity)
-	// {
-	// 	HitReceiver hitReceiver;
-	// 	player1.Subscribe<Hit>(hitReceiver);
-	// 	player1.Emit(Hit(player2.Get<Weapon>()));
-	//
-	// 	ASSERT_EQ(8, defender.Get<Character>().health)
-	// 		<< "subscriber was never triggered";
-	// }
+	TEST_F(EcsEvents, ReceiveEventForSingleEntity)
+	{
+		HitReceiver hitReceiver;
+		player1.Subscribe<Hit>(hitReceiver);
+		player1.Emit(Hit(player2.Get<Weapon>()));
 
-	// TEST_F(EcsEvents, ReceiveEventForSingleEntityWithLambda)
-	// {
-	// 	struct T {
-	// 		bool rekt;
-	// 	};
-	//
-	// 	bool rekt = false;
-	// 	player1.Subscribe<T>([&rekt](ecs::Entity e, const T &t) {
-	// 		rekt = t.rekt;
-	// 	});
-	//
-	// 	ASSERT_FALSE(rekt)
-	// 		<< "premature subscriber triggered";
-	//
-	// 	player1.Emit((struct T){.rekt = true});
-	//
-	// 	ASSERT_TRUE(rekt)
-	// 		<< "lambda subscriber was never triggered";
-	// }
+		ASSERT_EQ(8, player1.Get<Character>()->health)
+			<< "subscriber was never triggered";
+	}
+
+	TEST_F(EcsEvents, ReceiveEventForSingleEntityWithLambda)
+	{
+		struct T {
+			bool rekt;
+		};
+
+		bool rekt = false;
+		player1.Subscribe<T>([&rekt](ecs::Entity e, const T &t) {
+			rekt = t.rekt;
+		});
+
+		ASSERT_FALSE(rekt)
+			<< "premature subscriber triggered";
+
+		player1.Emit((struct T){.rekt = true});
+
+		ASSERT_TRUE(rekt)
+			<< "lambda subscriber was never triggered";
+	}
 
 	TEST_F(EcsEvents, ReceiveEventForAllEntities)
 	{
@@ -199,89 +201,90 @@ namespace test
 		}
 	}
 
-	// TEST_F(EcsEvents, MultiReceiveEventForSingleEntity)
-	// {
-	// 	// player1 gets hit twice per Hit event
-	// 	HitReceiver hitReceiver1;
-	// 	HitReceiver hitReceiver2;
-	// 	player1.Subscribe<Hit>(hitReceiver1);
-	// 	player1.Subscribe<Hit>(hitReceiver2);
-	//
-	// 	player1.Emit(Hit(player2.Get<Weapon>()));
-	//
-	// 	ASSERT_EQ(8, player1.Get<Character>().health)
-	// 		<< "not all subscribers were triggered";
-	// }
-	//
-	// TEST_F(EcsEvents, MultiReceiveEventForAllEntities)
-	// {
-	// 	// everyone gets hit twice per Hit event
-	// 	HitReceiver hitReceiver1;
-	// 	HitReceiver hitReceiver2;
-	// 	em.Subscribe<Hit>(hitReceiver);
-	//
-	// 	player1.Emit(Hit(player2.Get<Weapon>()));
-	// 	player2.Emit(Hit(player1.Get<Weapon>()));
-	//
-	// 	ASSERT_EQ(6, player1.Get<Character>().health)
-	// 		<< "not all subscribers were triggered";
-	//
-	// 	ASSERT_EQ(8, player2.Get<Character>().health)
-	// 		<< "not all subscribers were triggered";
-	// }
-	//
-	// TEST_F(EcsEvents, MultiReceiveEventForSingleEntityWithSingleReceiver)
-	// {
-	// 	// player1 gets hit twice per Hit event (same receiver subscribed twice)
-	// 	HitReceiver hitReceiver;
-	// 	player1.Subscribe<Hit>(hitReceiver);
-	// 	player1.Subscribe<Hit>(hitReceiver);
-	//
-	// 	player1.Emit(Hit(player2.Get<Weapon>()));
-	//
-	// 	ASSERT_EQ(6, player1.Get<Character>().health)
-	// 		<< "not all subscribers were triggered";
-	// }
-	//
-	// TEST_F(EcsEvents, ReceiveSingleEntityDestroyedEvent)
-	// {
-	// 	Gravedigger gravedigger;
-	// 	player1.Subscribe<ecs::EntityDestroyed>(gravedigger);
-	//
-	// 	ASSERT_EQ(0, gravedigger.gravesDug);
-	//
-	// 	player1.Destroy();
-	// 	ASSERT_EQ(1, gravedigger.gravesDug)
-	// 		<< "Entity destruction event not seen by subscriber";
-	//
-	// 	player2.Destroy();
-	// 	ASSERT_EQ(1, gravedigger.gravesDug)
-	// 		<< "subscriber saw an event it wasn't subscribed to";
-	// }
-	//
-	// TEST_F(EcsEvents, ReceiveAllEntityDestroyedEvents)
-	// {
-	// 	Gravedigger gravedigger;
-	// 	em.Subscribe<ecs::EntityDestroyed>(gravedigger);
-	//
-	// 	ASSERT_EQ(0, gravedigger.gravesDug);
-	// 	player1.Destroy();
-	// 	ASSERT_EQ(1, gravedigger.gravesDug)
-	// 		<< "Entity destruction event not seen by subscriber";
-	// }
-	//
-	// TEST_F(EcsEvents, UnsubscribeFromSingleEntityEvent)
-	// {
-	// 	HitReceiver hitReceiver;
-	// 	player1.Subscribe<Hit>(hitReceiver);
-	// 	player1.Unsubscribe<Hit>(hitReceiver);
-	//
-	// 	player1.Emit(Hit(player2.Get<Weapon>()));
-	//
-	// 	ASSERT_EQ(10, player1.Get<Character>().health)
-	// 		<< "subscriber was triggered after it unsubscribed";
-	// }
-	//
+	TEST_F(EcsEvents, MultiReceiveEventForSingleEntity)
+	{
+		// player1 gets hit twice per Hit event
+		HitReceiver hitReceiver1;
+		HitReceiver hitReceiver2;
+		player1.Subscribe<Hit>(hitReceiver1);
+		player1.Subscribe<Hit>(hitReceiver2);
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+
+		ASSERT_EQ(8, player1.Get<Character>()->health)
+			<< "not all subscribers were triggered";
+	}
+
+	TEST_F(EcsEvents, MultiReceiveEventForAllEntities)
+	{
+		// everyone gets hit twice per Hit event
+		HitReceiver hitReceiver1;
+		HitReceiver hitReceiver2;
+		em.Subscribe<Hit>(hitReceiver1);
+		em.Subscribe<Hit>(hitReceiver2);
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+		player2.Emit(Hit(player1.Get<Weapon>()));
+
+		ASSERT_EQ(6, player1.Get<Character>()->health)
+			<< "not all subscribers were triggered";
+
+		ASSERT_EQ(8, player2.Get<Character>()->health)
+			<< "not all subscribers were triggered";
+	}
+
+	TEST_F(EcsEvents, MultiReceiveEventForSingleEntityWithSingleReceiver)
+	{
+		// player1 gets hit twice per Hit event (same receiver subscribed twice)
+		HitReceiver hitReceiver;
+		player1.Subscribe<Hit>(hitReceiver);
+		player1.Subscribe<Hit>(hitReceiver);
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+
+		ASSERT_EQ(6, player1.Get<Character>()->health)
+			<< "not all subscribers were triggered";
+	}
+
+	TEST_F(EcsEvents, ReceiveSingleEntityDestroyedEvent)
+	{
+		Gravedigger gravedigger;
+		player1.Subscribe<ecs::EntityDestroyed>(std::ref(gravedigger));
+
+		ASSERT_EQ(0, gravedigger.gravesDug);
+
+		player1.Destroy();
+		ASSERT_EQ(1, gravedigger.gravesDug)
+			<< "Entity destruction event not seen by subscriber";
+
+		player2.Destroy();
+		ASSERT_EQ(1, gravedigger.gravesDug)
+			<< "subscriber saw an event it wasn't subscribed to";
+	}
+
+	TEST_F(EcsEvents, ReceiveAllEntityDestroyedEvents)
+	{
+		Gravedigger gravedigger;
+		em.Subscribe<ecs::EntityDestroyed>(std::ref(gravedigger));
+
+		ASSERT_EQ(0, gravedigger.gravesDug);
+		player1.Destroy();
+		ASSERT_EQ(1, gravedigger.gravesDug)
+			<< "Entity destruction event not seen by subscriber";
+	}
+
+	TEST_F(EcsEvents, UnsubscribeFromSingleEntityEvent)
+	{
+		HitReceiver hitReceiver;
+		player1.Subscribe<Hit>(hitReceiver);
+		player1.Unsubscribe<Hit>(hitReceiver);
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+
+		ASSERT_EQ(10, player1.Get<Character>()->health)
+			<< "subscriber was triggered after it unsubscribed";
+	}
+
 	TEST_F(EcsEvents, UnsubscribeFromAllEntitiesEvent)
 	{
 		HitReceiver hitReceiver;

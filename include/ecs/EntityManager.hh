@@ -14,8 +14,6 @@
 #include "Handle.hh"
 #include "Subscription.hh"
 
-using namespace boost;
-
 namespace ecs
 {
 	class EntityManager
@@ -208,7 +206,7 @@ namespace ecs
 		 * template <typename Event>
 		 * signals2::signal<void(Entity, const Event &)>
 		 */
-		typedef signals2::signal<void(Entity, void *)> GenericSignal;
+		typedef boost::signals2::signal<void(Entity, void *)> GenericSignal;
 		vector<GenericSignal> eventSignals;
 
 		/**
@@ -235,7 +233,7 @@ namespace ecs
 		 * because different signal call signatures have the same size.
 		 */
 		template <typename Event>
-		signals2::signal<void(Entity, const Event &)> &getSignal(
+		boost::signals2::signal<void(Entity, const Event &)> &getSignal(
 			uint32 eventIndex);
 	};
 };

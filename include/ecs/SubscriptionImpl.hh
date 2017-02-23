@@ -4,7 +4,7 @@
 
 namespace ecs {
 
-	inline Subscription::Subscription(signals2::connection c)
+	inline Subscription::Subscription(boost::signals2::connection c)
 		: connection(c)
 	{}
 

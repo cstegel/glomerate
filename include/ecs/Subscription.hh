@@ -2,8 +2,6 @@
 
 #include <boost/signals2.hpp>
 
-using namespace boost;
-
 namespace ecs {
 
 	/**
@@ -11,7 +9,7 @@ namespace ecs {
 	 */
 	class Subscription {
 	public:
-		Subscription(signals2::connection c);
+		Subscription(boost::signals2::connection c);
 
 		/**
 		 * Returns true if the registered callback will still be called
@@ -28,6 +26,6 @@ namespace ecs {
 		 */
 		void Unsubscribe() const;
 	private:
-		signals2::connection connection;
+		boost::signals2::connection connection;
 	};
 }

@@ -3,6 +3,7 @@
 #include "ecs/EntityManager.hh"
 #include "ecs/Entity.hh"
 #include "ecs/Handle.hh"
+#include "ecs/EntityDestroyed.hh"
 
 // EntityManager
 namespace ecs
@@ -103,6 +104,8 @@ namespace ecs
 			throw std::invalid_argument(ss.str());
 		}
 
+		// trigger any subscribers to this entity's death before killing it
+		this->Emit(e, EntityDestroyed());
 		RemoveAllComponents(e);
 		entIndexToGen.at(e.Index())++;
 		freeEntityIndexes.push(e.Index());
@@ -171,7 +174,7 @@ namespace ecs
 	template <typename Event>
 	Subscription EntityManager::Subscribe(std::function<void(Entity, const Event &)> callback)
 	{
-		typedef signals2::signal<void(Entity, const Event &)> EventSignal;
+		typedef boost::signals2::signal<void(Entity, const Event &)> EventSignal;
 		std::type_index eventType = typeid(Event);
 
 		uint32 eventIndex;
@@ -188,7 +191,7 @@ namespace ecs
 		}
 
 		EventSignal &signal = getSignal<Event>(eventIndex);
-		signals2::connection c = signal.connect(callback);
+		boost::signals2::connection c = signal.connect(callback);
 
 		return Subscription(c);
 	}
@@ -204,19 +207,19 @@ namespace ecs
 	}
 
 	template <typename Event>
-	signals2::signal<void(Entity, const Event &)> &
+	boost::signals2::signal<void(Entity, const Event &)> &
 	EntityManager::getSignal(uint32 eventIndex)
 	{
 		// reinterpret_cast is okay here since only difference is the
 		// call signature of the stored functions, which does not affect size
-		typedef signals2::signal<void(Entity, const Event &)> EventSignal;
+		typedef boost::signals2::signal<void(Entity, const Event &)> EventSignal;
 		return *reinterpret_cast<EventSignal *>(&eventSignals.at(eventIndex));
 	}
 
 	template <typename Event>
 	void EntityManager::Emit(Entity::Id e, const Event &event)
 	{
-		typedef signals2::signal<void(Entity, const Event &)> EventSignal;
+		typedef boost::signals2::signal<void(Entity, const Event &)> EventSignal;
 
 		std::type_index eventType = typeid(Event);
 		if (eventTypeToEventIndex.count(eventType) == 0)
