@@ -152,11 +152,9 @@ namespace test
 
 	/**
 	 * Test that multiple large functors can be stored and called properly
-	 * without any of their values overwritten. Internally, callbacks
-	 * are stored in a vector<std::function<void(Entity, const Event &)>>
-	 * and std::function seems to always be 32 bytes so this likely isn't
-	 * ever going to be a problem. It would only be a problem if std::function
-	 * could be different sizes.
+	 * without any of their values overwritten. More of a sanity test
+	 * casting between signal2::signal types doesn't do anything strange
+	 * (this is done internally).
 	 */
 	TEST_F(EcsEvents, ReceiveEventForAllEntitiesWithLargeFunctors)
 	{
@@ -199,18 +197,6 @@ namespace test
 		for (auto x : f1b.nums) {
 			EXPECT_EQ(1, x);
 		}
-	}
-
-	// ensure that boost::signals2 works
-	TEST(EcsEventsBoost, Signals)
-	{
-		boost::signals2::signal<void ()> sig;
-
-		sig.connect([](){
-			std::cout << "Hello world!" << std::endl;
-		});
-
-		sig();
 	}
 
 	// TEST_F(EcsEvents, MultiReceiveEventForSingleEntity)
@@ -299,8 +285,8 @@ namespace test
 	TEST_F(EcsEvents, UnsubscribeFromAllEntitiesEvent)
 	{
 		HitReceiver hitReceiver;
-		ecs::SubId id = em.Subscribe<Hit>(hitReceiver);
-		em.Unsubscribe<Hit>(id);
+		ecs::Subscription sub = em.Subscribe<Hit>(hitReceiver);
+		sub.Unsubscribe();
 
 		player1.Emit(Hit(player2.Get<Weapon>()));
 
@@ -324,9 +310,9 @@ namespace test
 		bool triggered1 = false;
 		bool triggered2 = false;
 
-		ecs::SubId id1 = em.Subscribe<bool>([&](ecs::Entity e, bool unused){
+		ecs::Subscription sub = em.Subscribe<bool>([&](ecs::Entity e, bool _){
 			triggered1 = true;
-			em.Unsubscribe<bool>(id1);
+			sub.Unsubscribe();
 		});
 
 		em.Subscribe<bool>([&](ecs::Entity e, bool unused){

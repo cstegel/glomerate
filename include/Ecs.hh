@@ -15,4 +15,5 @@
 #include "ecs/ComponentManagerImpl.hh"
 #include "ecs/ComponentStorageImpl.hh"
 #include "ecs/HandleImpl.hh"
+#include "ecs/SubscriptionImpl.hh"
 

@@ -163,14 +163,15 @@ namespace ecs
 			throw std::runtime_error(ss.str());
 		}
 
-		uint32 eventIndex = eventSubscribers.size();
+		uint32 eventIndex = eventSignals.size();
 		eventTypeToEventIndex[eventType] = eventIndex;
-		eventSubscribers.push_back({});
+		eventSignals.push_back({});
 	}
 
 	template <typename Event>
-	SubId EntityManager::Subscribe(std::function<void(Entity, const Event &)> callback)
+	Subscription EntityManager::Subscribe(std::function<void(Entity, const Event &)> callback)
 	{
+		typedef signals2::signal<void(Entity, const Event &)> EventSignal;
 		std::type_index eventType = typeid(Event);
 
 		uint32 eventIndex;
@@ -186,69 +187,36 @@ namespace ecs
 			eventIndex = eventTypeToEventIndex.at(eventType);
 		}
 
-		auto subscribers = getSubscribers<Event>(eventIndex);
-		subscribers->push_back(callback);
+		EventSignal &signal = getSignal<Event>(eventIndex);
+		signals2::connection c = signal.connect(callback);
 
-		// index of where the subscriber was stored
-		return SubId(subscribers->size() - 1);
+		return Subscription(c);
 	}
 
 	template <typename Event>
-	SubId EntityManager::Subscribe(
+	Subscription EntityManager::Subscribe(
 		std::function<void(Entity, const Event &e)> callback,
 		Entity entity)
 	{
 		// TODO
 		throw runtime_error("not implemented");
-		return SubId(0);
+		return Subscription();
 	}
 
 	template <typename Event>
-	void EntityManager::Unsubscribe(SubId id)
-	{
-		std::type_index eventType = typeid(Event);
-
-		uint32 eventIndex;
-
-		try
-		{
-			eventIndex = eventTypeToEventIndex.at(eventType);
-		}
-		catch (const std::out_of_range &e)
-		{
-			std::stringstream ss;
-			ss << "Cannot unsubscribe from non-existant Event type '"
-			   << eventType.name() << "'";
-			throw std::runtime_error(ss.str());
-		}
-
-		auto subscribers = getSubscribers<Event>(eventIndex);
-		// TODO: mark as deleted then in Emit() after broadcast is done go
-		// through and remove the callbacks
-	}
-
-	template <typename Event>
-	void EntityManager::Unsubscribe(SubId id, Entity entity)
-	{
-		// TODO
-		throw runtime_error("not implemented");
-	}
-
-	template <typename Event>
-	vector<std::function<void(Entity, const Event &)>> *
-	EntityManager::getSubscribers(uint32 eventIndex)
+	signals2::signal<void(Entity, const Event &)> &
+	EntityManager::getSignal(uint32 eventIndex)
 	{
 		// reinterpret_cast is okay here since only difference is the
 		// call signature of the stored functions, which does not affect size
-		typedef std::function<void(Entity, const Event &)> Callback;
-		return reinterpret_cast<vector<Callback> *>(&eventSubscribers.at(eventIndex));
+		typedef signals2::signal<void(Entity, const Event &)> EventSignal;
+		return *reinterpret_cast<EventSignal *>(&eventSignals.at(eventIndex));
 	}
 
 	template <typename Event>
-	void EntityManager::
-		Emit(Entity::Id e, const Event &event)
+	void EntityManager::Emit(Entity::Id e, const Event &event)
 	{
-		typedef std::function<void(Entity, const Event &)> Callback;
+		typedef signals2::signal<void(Entity, const Event &)> EventSignal;
 
 		std::type_index eventType = typeid(Event);
 		if (eventTypeToEventIndex.count(eventType) == 0)
@@ -258,11 +226,8 @@ namespace ecs
 		}
 
 		auto eventIndex = eventTypeToEventIndex.at(eventType);
-		auto subscribers = getSubscribers<Event>(eventIndex);
-
-		for (Callback &callback : *subscribers) {
-			callback(Entity(this, e), event);
-		}
+		EventSignal &signal = getSignal<Event>(eventIndex);
+		signal(Entity(this, e), event);
 	}
 }
 

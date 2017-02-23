@@ -6,20 +6,18 @@
 #include <stdexcept>
 #include <sstream>
 #include <functional>
+#include <boost/signals2.hpp>
 
 #include "ecs/Common.hh"
 #include "ComponentManager.hh"
 #include "Entity.hh"
 #include "Handle.hh"
+#include "Subscription.hh"
 
+using namespace boost;
 
 namespace ecs
 {
-	/**
-	 * Identifies a subscriber. See EntityManager::Subscribe() methods.
-	 */
-	typedef uint32 SubId;
-
 	class EntityManager
 	{
 	public:
@@ -173,29 +171,17 @@ namespace ecs
 		 * occurs on ANY Entity.
 		 */
 		template <typename Event>
-		SubId Subscribe(std::function<void(Entity, const Event &e)> callback);
+		Subscription Subscribe(
+			std::function<void(Entity, const Event &e)> callback);
 
 		/**
 		 * Register @callback to be called whenever an event of type Event
 		 * occurs on @entity.
 		 */
 		template <typename Event>
-		SubId Subscribe(std::function<void(Entity, const Event &e)> callback,
-		               Entity entity);
-
-		/**
-		 * Unregister @callback for this type of Event. Throws a runtime_error
-		 * if it was never registered in the first place.
-		 */
-		template <typename Event>
-		void Unsubscribe(SubId id);
-
-		/**
-		 * Unregister @callback for this type of Event on @entity.
-		 * Throws a runtime_error if it was never registered in the first place.
-		 */
-		template <typename Event>
-		void Unsubscribe(SubId id, Entity entity);
+		Subscription Subscribe(
+			std::function<void(Entity, const Event &e)> callback,
+			Entity entity);
 
 		/**
 		 * Emit an event associated with the given entity. This will trigger
@@ -214,22 +200,27 @@ namespace ecs
 		uint64 nextEntityIndex;
 		ComponentManager compMgr;
 
-		// eventSubscribers[i] are all the subscribers to Event "event",
-		// where i = type_index(typeid(event))
-		//
-		// the function type actually is the following:
-		// template <typename Event>
-		// std::function<void(Entity, const Event &)>
-		typedef vector<std::function<void(Entity, void *)>> CallbackVector;
-		vector<CallbackVector> eventSubscribers;
+		/**
+		 * eventSignals[i] is the signal containing all subscribers to
+		 * one type of event where i = eventTypeToEventIndex.at(typeid(event))
+		 *
+		 * the callback function type actually is the following:
+		 * template <typename Event>
+		 * signals2::signal<void(Entity, const Event &)>
+		 */
+		typedef signals2::signal<void(Entity, void *)> GenericSignal;
+		vector<GenericSignal> eventSignals;
 
-		// map the typeid(T) of a Event type, T, to the "index" of that
-		// event type. Any time a subscriber to an event is added to a vector,
-		// it will be added to the sub-vector at this index.
+		/**
+		 * map the typeid(T) of a Event type, T, to the "index" of that
+		 * event type. Any time a subscriber to an event is added to a vector,
+		 * it will be added to the sub-vector at this index.
+		 */
 		GLOMERATE_MAP_TYPE<std::type_index, uint32> eventTypeToEventIndex;
 
 		/**
-		 * Allocates storage space for subscribers for a new type of Event.
+		 * Allocates storage space for subscribers for a new type of Event
+		 * and assigns that Event an index in this->eventTypeToEventIndex.
 		 * Should only ever be called once when the first of this Event type
 		 * is seen.
 		 */
@@ -237,14 +228,14 @@ namespace ecs
 		void registerEventType();
 
 		/**
-		 * Given the index in this->eventSubscribers, return
-		 * this->eventSubscribers.at(eventIndex) with the functions casted to
+		 * Given the index in this->eventSignals, return
+		 * this->eventSignals.at(eventIndex) with the signal casted to
 		 * the proper calling type. This performs a reinterpret_cast to convert
-		 * the vector of function<void(Entity, void *)> but this is okay
-		 * because different std::function call signatures have the same size.
+		 * the signal type but this is okay
+		 * because different signal call signatures have the same size.
 		 */
 		template <typename Event>
-		vector<std::function<void(Entity, const Event &)>> *getSubscribers(
+		signals2::signal<void(Entity, const Event &)> &getSignal(
 			uint32 eventIndex);
 	};
 };
