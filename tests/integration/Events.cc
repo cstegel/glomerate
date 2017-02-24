@@ -89,6 +89,14 @@ namespace test
 		}
 	};
 
+	class EcsNonEntityEvents : public ::testing::Test
+	{
+	protected:
+		ecs::EntityManager em;
+
+		virtual void SetUp() {}
+	};
+
 	TEST_F(EcsEvents, ReceiveEventForSingleEntity)
 	{
 		HitReceiver hitReceiver;
@@ -302,6 +310,8 @@ namespace test
 		ecs::Subscription sub = player1.Subscribe<Hit>(hitReceiver);
 		sub.Unsubscribe();
 
+		EXPECT_FALSE(sub.IsActive());
+
 		player1.Emit(Hit(player2.Get<Weapon>()));
 
 		ASSERT_EQ(10, player1.Get<Character>()->health)
@@ -313,6 +323,7 @@ namespace test
 		HitReceiver hitReceiver;
 		ecs::Subscription sub = em.Subscribe<Hit>(hitReceiver);
 		sub.Unsubscribe();
+		EXPECT_FALSE(sub.IsActive());
 
 		player1.Emit(Hit(player2.Get<Weapon>()));
 
@@ -339,6 +350,7 @@ namespace test
 		ecs::Subscription sub = em.Subscribe<bool>([&](ecs::Entity e, bool _){
 			triggered1 = true;
 			sub.Unsubscribe();
+			EXPECT_FALSE(sub.IsActive());
 		});
 
 		em.Subscribe<bool>([&](ecs::Entity e, bool unused){
@@ -349,5 +361,46 @@ namespace test
 
 		EXPECT_TRUE(triggered1);
 		EXPECT_TRUE(triggered2);
+	}
+
+	TEST_F(EcsNonEntityEvents, SingleReceive)
+	{
+		bool called = false;
+		em.Subscribe<bool>([&](bool arg) {
+			called = arg;
+		});
+
+		em.Emit(true);
+		ASSERT_TRUE(called);
+	}
+
+	TEST_F(EcsNonEntityEvents, MultiReceive)
+	{
+		int timesCalled = 0;
+		auto callback = [&](bool arg) {
+			timesCalled += 1;
+		};
+
+		em.Subscribe<bool>(callback);
+		em.Subscribe<bool>(callback);
+
+		em.Emit(true);
+		ASSERT_EQ(2, timesCalled);
+	}
+
+
+	TEST_F(EcsNonEntityEvents, Unsubscribe)
+	{
+		int timesCalled = 0;
+		auto callback = [&](bool arg) {
+			timesCalled += 1;
+		};
+
+		ecs::Subscription sub = em.Subscribe<bool>(callback);
+		em.Emit(true);
+		sub.Unsubscribe();
+
+		EXPECT_EQ(1, timesCalled);
+		EXPECT_FALSE(sub.IsActive());
 	}
 }

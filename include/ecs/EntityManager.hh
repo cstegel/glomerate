@@ -174,6 +174,13 @@ namespace ecs
 
 		/**
 		 * Register @callback to be called whenever an event of type Event
+		 * occurs.
+		 */
+		template <typename Event>
+		Subscription Subscribe(std::function<void(const Event &e)> callback);
+
+		/**
+		 * Register @callback to be called whenever an event of type Event
 		 * occurs on @entity.
 		 */
 		template <typename Event>
@@ -188,6 +195,12 @@ namespace ecs
 		template <typename Event>
 		void Emit(Entity::Id e, const Event &event);
 
+		/**
+		 * Emit an event that is not associated with any Entity
+		 */
+		template <typename Event>
+		void Emit(const Event &event);
+
 	private:
 		static const size_t RECYCLE_ENTITY_COUNT = 2048;
 
@@ -197,7 +210,6 @@ namespace ecs
 		uint64 nextEntityIndex;
 		ComponentManager compMgr;
 
-	private:
 		/**
 		 * eventSignals[i] is the signal containing all subscribers to
 		 * one type of event where i = eventTypeToEventIndex.at(typeid(event))
@@ -211,10 +223,21 @@ namespace ecs
 
 		/**
 		 * map the typeid(T) of a Event type, T, to the "index" of that
-		 * event type. Any time a subscriber to an event is added to a vector,
-		 * it will be added to the sub-vector at this index.
+		 * event type. Any time a subscriber to an event is added to
+		 * this->eventSignals, it will be added to the sub-vector at this index.
 		 */
 		GLOMERATE_MAP_TYPE<std::type_index, uint32> eventTypeToEventIndex;
+
+		/**
+		 * Same as this->eventTypeToEventIndex but for
+		 * this->nonEntityEventSignals
+		 */
+		GLOMERATE_MAP_TYPE<std::type_index, uint32>
+			eventTypeToNonEntityEventIndex;
+
+		typedef boost::signals2::signal<void(void *)> NonEntitySignal;
+		vector<NonEntitySignal> nonEntityEventSignals;
+
 
 		// TODO-cs: use a map that recycles empty spots with some sort of pool
 		// to avoid excessive dynamic mem allocs when entities are
@@ -222,6 +245,7 @@ namespace ecs
 		typedef GLOMERATE_MAP_TYPE<std::type_index, GenericSignal> SignalMap;
 		GLOMERATE_MAP_TYPE<Entity::Id, SignalMap> entityEventSignals;
 
+	private:
 		/**
 		 * Allocates storage space for subscribers for a new type of Event
 		 * and assigns that Event an index in this->eventTypeToEventIndex.
@@ -230,6 +254,13 @@ namespace ecs
 		 */
 		template <typename Event>
 		void registerEventType();
+
+		/**
+		 * Same as registerEventType(), but for events that aren't associated
+		 * with entitites.
+		 */
+		template <typename Event>
+		void registerNonEntityEventType();
 
 		/**
 		 * Given the index in this->eventSignals, return

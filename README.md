@@ -62,12 +62,17 @@ Output:
 
 # Events
 
-The event system can be used to easily allow callbacks to be triggered when specific events occur on various Entities. Events are identified by any user-defined data type.  Callbacks can be registered to trigger when an event occurs on...
+The event system can be used to easily allow callbacks to be triggered when specific events occur. Events are identified by any user-defined data type.  Callbacks can be registered to trigger when an event occurs...
 
-1. a single (specified) entity
-2. any entity
+1. on a single (specified) entity
+2. on any entity
+3. in isolation (not associated with any entity)
 
-Below is a complete example showcasing the event system. For more examples, see the tests in ```tests/integration/Events.cc```
+Callbacks registered for scenarios 1 and 2 above have the call signature ```void(ecs::Entity, const Event &)```.
+
+Callbacks registered for scenario 3 have the call signature ```void(const Event &)```.
+
+Below is a complete example showcasing most of the event system. For more examples, see the tests in ```tests/integration/Events.cc```
 
 ```c++
 #include <Ecs.hh>

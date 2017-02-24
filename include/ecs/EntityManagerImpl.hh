@@ -185,7 +185,54 @@ namespace ecs
 	}
 
 	template <typename Event>
-	Subscription EntityManager::Subscribe(std::function<void(Entity, const Event &)> callback)
+	void EntityManager::registerNonEntityEventType()
+	{
+		std::type_index eventType = typeid(Event);
+
+		if (eventTypeToNonEntityEventIndex.count(eventType) != 0)
+		{
+			std::stringstream ss;
+			ss << "event type " << string(eventType.name())
+			   << " is already registered";
+			throw std::runtime_error(ss.str());
+		}
+
+		uint32 nonEntityEventIndex = nonEntityEventSignals.size();
+		eventTypeToNonEntityEventIndex[eventType] = nonEntityEventIndex;
+		nonEntityEventSignals.push_back({});
+	}
+
+	template <typename Event>
+	Subscription EntityManager::Subscribe(
+		std::function<void(const Event &e)> callback)
+	{
+		// TODO-cs: this shares a lot of code in common with
+		// Subscribe(function<void(Entity, const Event &)>), find a way
+		// to eliminate the duplicate code.
+		std::type_index eventType = typeid(Event);
+
+		uint32 nonEntityEventIndex;
+
+		try
+		{
+			nonEntityEventIndex = eventTypeToNonEntityEventIndex.at(eventType);
+		}
+		// Non-Entity Event never seen before, add it to the collection
+		catch (const std::out_of_range &e)
+		{
+			registerNonEntityEventType<Event>();
+			nonEntityEventIndex = eventTypeToNonEntityEventIndex.at(eventType);
+		}
+
+		auto &signal = nonEntityEventSignals.at(nonEntityEventIndex);
+		boost::signals2::connection c = signal.connect(callback);
+
+		return Subscription(c);
+	}
+
+	template <typename Event>
+	Subscription EntityManager::Subscribe(
+		std::function<void(Entity, const Event &)> callback)
 	{
 		typedef boost::signals2::signal<void(Entity, const Event &)> EventSignal;
 		std::type_index eventType = typeid(Event);
@@ -263,6 +310,21 @@ namespace ecs
 				auto &eventSignal = getOrCreateEntitySignal<Event>(e);
 				eventSignal(entity, event);
 			}
+		}
+	}
+
+	template <typename Event>
+	void EntityManager::Emit(const Event &event)
+	{
+		typedef boost::signals2::signal<void(const Event &)> EventSignal;
+		std::type_index eventType = typeid(Event);
+
+		if (eventTypeToNonEntityEventIndex.count(eventType) > 0)
+		{
+			auto eventIndex = eventTypeToNonEntityEventIndex.at(eventType);
+			auto &sig = nonEntityEventSignals.at(eventIndex);
+			EventSignal &signal = *reinterpret_cast<EventSignal *>(&sig);
+			signal(event);
 		}
 	}
 }
