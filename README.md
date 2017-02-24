@@ -72,6 +72,8 @@ Callbacks registered for scenarios 1 and 2 above have the call signature ```void
 
 Callbacks registered for scenario 3 have the call signature ```void(const Event &)```.
 
+The ECS emits a special ```ecs::EntityDestruction``` event just before an entity is destroyed.
+
 Below is a complete example showcasing most of the event system. For more examples, see the tests in ```tests/integration/Events.cc```
 
 ```c++
