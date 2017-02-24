@@ -43,7 +43,7 @@ namespace test
 	class Gravedigger
 	{
 	public:
-		void operator()(ecs::Entity e, const ecs::EntityDestroyed &d)
+		void operator()(ecs::Entity e, const ecs::EntityDestruction &d)
 		{
 			gravesDug += 1;
 		}
@@ -211,7 +211,7 @@ namespace test
 
 		player1.Emit(Hit(player2.Get<Weapon>()));
 
-		ASSERT_EQ(8, player1.Get<Character>()->health)
+		ASSERT_EQ(6, player1.Get<Character>()->health)
 			<< "not all subscribers were triggered";
 	}
 
@@ -233,6 +233,29 @@ namespace test
 			<< "not all subscribers were triggered";
 	}
 
+	TEST_F(EcsEvents, MultiReceiveEventForAllSingleEntitiesAndAllEntities)
+	{
+		// everyone gets hit 4 times per Hit event
+		HitReceiver hitReceiver;
+		em.Subscribe<Hit>(hitReceiver);
+		em.Subscribe<Hit>(hitReceiver);
+
+		player1.Subscribe<Hit>(hitReceiver);
+		player1.Subscribe<Hit>(hitReceiver);
+
+		player2.Subscribe<Hit>(hitReceiver);
+		player2.Subscribe<Hit>(hitReceiver);
+
+		player1.Emit(Hit(player2.Get<Weapon>()));
+		player2.Emit(Hit(player1.Get<Weapon>()));
+
+		ASSERT_EQ(2, player1.Get<Character>()->health)
+			<< "not all subscribers were triggered";
+
+		ASSERT_EQ(6, player2.Get<Character>()->health)
+			<< "not all subscribers were triggered";
+	}
+
 	TEST_F(EcsEvents, MultiReceiveEventForSingleEntityWithSingleReceiver)
 	{
 		// player1 gets hit twice per Hit event (same receiver subscribed twice)
@@ -246,10 +269,10 @@ namespace test
 			<< "not all subscribers were triggered";
 	}
 
-	TEST_F(EcsEvents, ReceiveSingleEntityDestroyedEvent)
+	TEST_F(EcsEvents, ReceiveSingleEntityDestructionEvent)
 	{
 		Gravedigger gravedigger;
-		player1.Subscribe<ecs::EntityDestroyed>(std::ref(gravedigger));
+		player1.Subscribe<ecs::EntityDestruction>(std::ref(gravedigger));
 
 		ASSERT_EQ(0, gravedigger.gravesDug);
 
@@ -262,10 +285,10 @@ namespace test
 			<< "subscriber saw an event it wasn't subscribed to";
 	}
 
-	TEST_F(EcsEvents, ReceiveAllEntityDestroyedEvents)
+	TEST_F(EcsEvents, ReceiveAllEntityDestructionyedEvents)
 	{
 		Gravedigger gravedigger;
-		em.Subscribe<ecs::EntityDestroyed>(std::ref(gravedigger));
+		em.Subscribe<ecs::EntityDestruction>(std::ref(gravedigger));
 
 		ASSERT_EQ(0, gravedigger.gravesDug);
 		player1.Destroy();
@@ -276,8 +299,8 @@ namespace test
 	TEST_F(EcsEvents, UnsubscribeFromSingleEntityEvent)
 	{
 		HitReceiver hitReceiver;
-		player1.Subscribe<Hit>(hitReceiver);
-		player1.Unsubscribe<Hit>(hitReceiver);
+		ecs::Subscription sub = player1.Subscribe<Hit>(hitReceiver);
+		sub.Unsubscribe();
 
 		player1.Emit(Hit(player2.Get<Weapon>()));
 

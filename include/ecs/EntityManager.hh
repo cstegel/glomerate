@@ -179,7 +179,7 @@ namespace ecs
 		template <typename Event>
 		Subscription Subscribe(
 			std::function<void(Entity, const Event &e)> callback,
-			Entity entity);
+			Entity::Id entity);
 
 		/**
 		 * Emit an event associated with the given entity. This will trigger
@@ -189,7 +189,6 @@ namespace ecs
 		void Emit(Entity::Id e, const Event &event);
 
 	private:
-
 		static const size_t RECYCLE_ENTITY_COUNT = 2048;
 
 		vector<Entity::Id> entities;
@@ -198,6 +197,7 @@ namespace ecs
 		uint64 nextEntityIndex;
 		ComponentManager compMgr;
 
+	private:
 		/**
 		 * eventSignals[i] is the signal containing all subscribers to
 		 * one type of event where i = eventTypeToEventIndex.at(typeid(event))
@@ -216,6 +216,12 @@ namespace ecs
 		 */
 		GLOMERATE_MAP_TYPE<std::type_index, uint32> eventTypeToEventIndex;
 
+		// TODO-cs: use a map that recycles empty spots with some sort of pool
+		// to avoid excessive dynamic mem allocs when entities are
+		// created/destroyed
+		typedef GLOMERATE_MAP_TYPE<std::type_index, GenericSignal> SignalMap;
+		GLOMERATE_MAP_TYPE<Entity::Id, SignalMap> entityEventSignals;
+
 		/**
 		 * Allocates storage space for subscribers for a new type of Event
 		 * and assigns that Event an index in this->eventTypeToEventIndex.
@@ -233,7 +239,15 @@ namespace ecs
 		 * because different signal call signatures have the same size.
 		 */
 		template <typename Event>
-		boost::signals2::signal<void(Entity, const Event &)> &getSignal(
-			uint32 eventIndex);
+		boost::signals2::signal<void(Entity, const Event &)> &
+		getSignal(boost::signals2::signal<void(Entity, void *)> &sig);
+
+		/**
+		 * Retrieves the signals2::signal for the Event specific to @entity.
+		 * If one does not exist then it will be created and returned.
+		 */
+		template <typename Event>
+		boost::signals2::signal<void(Entity, const Event &)> &
+		getOrCreateEntitySignal(Entity::Id entity);
 	};
 };

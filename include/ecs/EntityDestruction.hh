@@ -2,6 +2,6 @@
 
 namespace ecs {
 
-	class EntityDestroyed {};
+	class EntityDestruction {};
 
 }

@@ -145,15 +145,13 @@ namespace ecs
 	}
 
 	template <typename Event>
-	void Entity::Subscribe(std::function<void(Entity, const Event &)> callback)
+	Subscription Entity::Subscribe(
+		std::function<void(Entity, const Event &)> callback)
 	{
-		// TODO
-	}
-
-	template <typename Event>
-	void Entity::Unsubscribe(std::function<void(Entity, const Event &)> callback)
-	{
-		// TODO
+		if (em == nullptr) {
+			throw runtime_error("Cannot subscribe to events on NULL entity");
+		}
+		return em->Subscribe(callback, this->eid);
 	}
 
 	template <typename Event>
@@ -161,18 +159,4 @@ namespace ecs
 	{
 		em->Emit(this->eid, event);
 	}
-}
-
-namespace std
-{
-	// allow Entity class to be used in hashed data structures
-	template <>
-	struct hash<ecs::Entity>
-	{
-	public:
-		size_t operator()(const ecs::Entity &e) const
-		{
-			return hash<uint64>()(e.eid.id);
-		}
-	};
 }
