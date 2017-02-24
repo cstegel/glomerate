@@ -2,6 +2,7 @@
 
 #include <ostream>
 #include "ecs/Common.hh"
+#include "ecs/Subscription.hh"
 
 namespace ecs
 {
@@ -16,11 +17,12 @@ namespace ecs
 	 */
 	class Entity
 	{
-	public:
 		friend struct std::hash<Entity>;
+	public:
 		class Id
 		{
 			friend struct std::hash<Entity>;
+			friend struct std::hash<Entity::Id>;
 			friend class EntityManager;
 		public:
 
@@ -118,8 +120,45 @@ namespace ecs
 		template <typename CompType>
 		Handle<CompType> Get();
 
+		/**
+		 * Register @callback to be called when an event of type Event
+		 * occurs on this Entity.
+		 */
+		template <typename Event>
+		Subscription Subscribe(
+			std::function<void(Entity, const Event &)> callback);
+
+		/**
+		 * Emit an Event on this Entity that associate subscribers will see.
+		 */
+		template <typename Event>
+		void Emit(const Event &event);
+
 	private:
 		EntityManager *em;
 		Entity::Id eid;
+	};
+}
+
+namespace std
+{
+	// allow Entity class to be used in hashed data structures
+	template <>
+	struct hash<ecs::Entity>
+	{
+		size_t operator()(const ecs::Entity &e) const
+		{
+			return hash<uint64>()(e.eid.id);
+		}
+	};
+
+	// allow Entity::Id class to be used in hashed data structures
+	template <>
+	struct hash<ecs::Entity::Id>
+	{
+		size_t operator()(const ecs::Entity::Id &e) const
+		{
+			return hash<uint64>()(e.id);
+		}
 	};
 }

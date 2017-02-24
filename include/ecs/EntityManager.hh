@@ -5,11 +5,14 @@
 #include <functional>
 #include <stdexcept>
 #include <sstream>
+#include <functional>
+#include <boost/signals2.hpp>
+
 #include "ecs/Common.hh"
 #include "ComponentManager.hh"
 #include "Entity.hh"
 #include "Handle.hh"
-
+#include "Subscription.hh"
 
 namespace ecs
 {
@@ -161,8 +164,44 @@ namespace ecs
 		 */
 		EntityCollection EntitiesWith(ComponentManager::ComponentMask compMask);
 
-	private:
+		/**
+		 * Register @callback to be called whenever an event of type Event
+		 * occurs on ANY Entity.
+		 */
+		template <typename Event>
+		Subscription Subscribe(
+			std::function<void(Entity, const Event &e)> callback);
 
+		/**
+		 * Register @callback to be called whenever an event of type Event
+		 * occurs.
+		 */
+		template <typename Event>
+		Subscription Subscribe(std::function<void(const Event &e)> callback);
+
+		/**
+		 * Register @callback to be called whenever an event of type Event
+		 * occurs on @entity.
+		 */
+		template <typename Event>
+		Subscription Subscribe(
+			std::function<void(Entity, const Event &e)> callback,
+			Entity::Id entity);
+
+		/**
+		 * Emit an event associated with the given entity. This will trigger
+		 * any callbacks that have subscribed to this kind of event.
+		 */
+		template <typename Event>
+		void Emit(Entity::Id e, const Event &event);
+
+		/**
+		 * Emit an event that is not associated with any Entity
+		 */
+		template <typename Event>
+		void Emit(const Event &event);
+
+	private:
 		static const size_t RECYCLE_ENTITY_COUNT = 2048;
 
 		vector<Entity::Id> entities;
@@ -170,5 +209,76 @@ namespace ecs
 		std::queue<uint64> freeEntityIndexes;
 		uint64 nextEntityIndex;
 		ComponentManager compMgr;
+
+		/**
+		 * eventSignals[i] is the signal containing all subscribers to
+		 * one type of event where i = eventTypeToEventIndex.at(typeid(event))
+		 *
+		 * the callback function type actually is the following:
+		 * template <typename Event>
+		 * signals2::signal<void(Entity, const Event &)>
+		 */
+		typedef boost::signals2::signal<void(Entity, void *)> GenericSignal;
+		vector<GenericSignal> eventSignals;
+
+		/**
+		 * map the typeid(T) of a Event type, T, to the "index" of that
+		 * event type. Any time a subscriber to an event is added to
+		 * this->eventSignals, it will be added to the sub-vector at this index.
+		 */
+		GLOMERATE_MAP_TYPE<std::type_index, uint32> eventTypeToEventIndex;
+
+		/**
+		 * Same as this->eventTypeToEventIndex but for
+		 * this->nonEntityEventSignals
+		 */
+		GLOMERATE_MAP_TYPE<std::type_index, uint32>
+			eventTypeToNonEntityEventIndex;
+
+		typedef boost::signals2::signal<void(void *)> NonEntitySignal;
+		vector<NonEntitySignal> nonEntityEventSignals;
+
+
+		// TODO-cs: use a map that recycles empty spots with some sort of pool
+		// to avoid excessive dynamic mem allocs when entities are
+		// created/destroyed
+		typedef GLOMERATE_MAP_TYPE<std::type_index, GenericSignal> SignalMap;
+		GLOMERATE_MAP_TYPE<Entity::Id, SignalMap> entityEventSignals;
+
+	private:
+		/**
+		 * Allocates storage space for subscribers for a new type of Event
+		 * and assigns that Event an index in this->eventTypeToEventIndex.
+		 * Should only ever be called once when the first of this Event type
+		 * is seen.
+		 */
+		template <typename Event>
+		void registerEventType();
+
+		/**
+		 * Same as registerEventType(), but for events that aren't associated
+		 * with entitites.
+		 */
+		template <typename Event>
+		void registerNonEntityEventType();
+
+		/**
+		 * Given the index in this->eventSignals, return
+		 * this->eventSignals.at(eventIndex) with the signal casted to
+		 * the proper calling type. This performs a reinterpret_cast to convert
+		 * the signal type but this is okay
+		 * because different signal call signatures have the same size.
+		 */
+		template <typename Event>
+		boost::signals2::signal<void(Entity, const Event &)> &
+		getSignal(boost::signals2::signal<void(Entity, void *)> &sig);
+
+		/**
+		 * Retrieves the signals2::signal for the Event specific to @entity.
+		 * If one does not exist then it will be created and returned.
+		 */
+		template <typename Event>
+		boost::signals2::signal<void(Entity, const Event &)> &
+		getOrCreateEntitySignal(Entity::Id entity);
 	};
 };

@@ -3,6 +3,7 @@
 #include "ecs/EntityManager.hh"
 #include "ecs/Entity.hh"
 #include "ecs/Handle.hh"
+#include "ecs/EntityDestruction.hh"
 
 // EntityManager
 namespace ecs
@@ -96,11 +97,26 @@ namespace ecs
 
 	inline void EntityManager::Destroy(Entity::Id e)
 	{
+		typedef boost::signals2::signal<void(Entity, void *)> GenericSig;
+
 		if (!Valid(e))
 		{
 			std::stringstream ss;
 			ss << "entity " << e << " is not valid; it may have already been destroyed.";
 			throw std::invalid_argument(ss.str());
+		}
+
+		// notify any subscribers of this entity's death before killing it
+		this->Emit(e, EntityDestruction());
+
+		// detach any subscribers listening for events on this entity
+		if (entityEventSignals.count(e) > 0) {
+			for (auto &kv : entityEventSignals[e]) {
+				GenericSig &signal = kv.second;
+				signal.disconnect_all_slots();
+			}
+
+			entityEventSignals.erase(e);
 		}
 
 		RemoveAllComponents(e);
@@ -148,6 +164,168 @@ namespace ecs
 			smallestCompPool->Entities(),
 			smallestCompPool->CreateIterateLock()
 		);
+	}
+
+	template <typename Event>
+	void EntityManager::registerEventType()
+	{
+		std::type_index eventType = typeid(Event);
+
+		if (eventTypeToEventIndex.count(eventType) != 0)
+		{
+			std::stringstream ss;
+			ss << "event type " << string(eventType.name())
+			   << " is already registered";
+			throw std::runtime_error(ss.str());
+		}
+
+		uint32 eventIndex = eventSignals.size();
+		eventTypeToEventIndex[eventType] = eventIndex;
+		eventSignals.push_back({});
+	}
+
+	template <typename Event>
+	void EntityManager::registerNonEntityEventType()
+	{
+		std::type_index eventType = typeid(Event);
+
+		if (eventTypeToNonEntityEventIndex.count(eventType) != 0)
+		{
+			std::stringstream ss;
+			ss << "event type " << string(eventType.name())
+			   << " is already registered";
+			throw std::runtime_error(ss.str());
+		}
+
+		uint32 nonEntityEventIndex = nonEntityEventSignals.size();
+		eventTypeToNonEntityEventIndex[eventType] = nonEntityEventIndex;
+		nonEntityEventSignals.push_back({});
+	}
+
+	template <typename Event>
+	Subscription EntityManager::Subscribe(
+		std::function<void(const Event &e)> callback)
+	{
+		// TODO-cs: this shares a lot of code in common with
+		// Subscribe(function<void(Entity, const Event &)>), find a way
+		// to eliminate the duplicate code.
+		std::type_index eventType = typeid(Event);
+
+		uint32 nonEntityEventIndex;
+
+		try
+		{
+			nonEntityEventIndex = eventTypeToNonEntityEventIndex.at(eventType);
+		}
+		// Non-Entity Event never seen before, add it to the collection
+		catch (const std::out_of_range &e)
+		{
+			registerNonEntityEventType<Event>();
+			nonEntityEventIndex = eventTypeToNonEntityEventIndex.at(eventType);
+		}
+
+		auto &signal = nonEntityEventSignals.at(nonEntityEventIndex);
+		boost::signals2::connection c = signal.connect(callback);
+
+		return Subscription(c);
+	}
+
+	template <typename Event>
+	Subscription EntityManager::Subscribe(
+		std::function<void(Entity, const Event &)> callback)
+	{
+		typedef boost::signals2::signal<void(Entity, const Event &)> EventSignal;
+		std::type_index eventType = typeid(Event);
+
+		uint32 eventIndex;
+
+		try
+		{
+			eventIndex = eventTypeToEventIndex.at(eventType);
+		}
+		// Event never seen before, add it to the collection
+		catch (const std::out_of_range &e)
+		{
+			registerEventType<Event>();
+			eventIndex = eventTypeToEventIndex.at(eventType);
+		}
+
+		EventSignal &signal = getSignal<Event>(eventSignals.at(eventIndex));
+		boost::signals2::connection c = signal.connect(callback);
+
+		return Subscription(c);
+	}
+
+	template <typename Event>
+	Subscription EntityManager::Subscribe(
+		std::function<void(Entity, const Event &e)> callback,
+		Entity::Id entity)
+	{
+		auto &eventSignal = getOrCreateEntitySignal<Event>(entity);
+		boost::signals2::connection &&c = eventSignal.connect(callback);
+
+		return Subscription(c);
+	}
+
+	template <typename Event>
+	boost::signals2::signal<void(Entity, const Event &)> &
+	EntityManager::getOrCreateEntitySignal(Entity::Id entity)
+	{
+		typedef boost::signals2::signal<void(Entity, void *)> GenericSig;
+		typedef boost::signals2::signal<void(Entity, const Event &)> EventSig;
+
+		GenericSig &genSignal = entityEventSignals[entity][typeid(Event)];
+		EventSig &eventSignal = getSignal<Event>(genSignal);
+		return eventSignal;
+	}
+
+	template <typename Event>
+	boost::signals2::signal<void(Entity, const Event &)> &
+	EntityManager::getSignal(boost::signals2::signal<void(Entity, void *)> &sig)
+	{
+		// reinterpret_cast is okay here since only difference is the
+		// call signature of the stored functions, which does not affect size
+		typedef boost::signals2::signal<void(Entity, const Event &)> EventSignal;
+		return *reinterpret_cast<EventSignal *>(&sig);
+	}
+
+	template <typename Event>
+	void EntityManager::Emit(Entity::Id e, const Event &event)
+	{
+		typedef boost::signals2::signal<void(Entity, const Event &)> EventSignal;
+		std::type_index eventType = typeid(Event);
+		Entity entity(this, e);
+
+		// signal the generic Event subscribers
+		if (eventTypeToEventIndex.count(eventType) > 0)
+		{
+			auto eventIndex = eventTypeToEventIndex.at(eventType);
+			EventSignal &signal = getSignal<Event>(eventSignals.at(eventIndex));
+			signal(entity, event);
+		}
+
+		// now signal the entity-specific Event subscribers
+		if (entityEventSignals.count(e) > 0) {
+			if (entityEventSignals[e].count(eventType) > 0) {
+				auto &eventSignal = getOrCreateEntitySignal<Event>(e);
+				eventSignal(entity, event);
+			}
+		}
+	}
+
+	template <typename Event>
+	void EntityManager::Emit(const Event &event)
+	{
+		typedef boost::signals2::signal<void(const Event &)> EventSignal;
+		std::type_index eventType = typeid(Event);
+
+		if (eventTypeToNonEntityEventIndex.count(eventType) > 0)
+		{
+			auto eventIndex = eventTypeToNonEntityEventIndex.at(eventType);
+			auto &sig = nonEntityEventSignals.at(eventIndex);
+			EventSignal &signal = *reinterpret_cast<EventSignal *>(&sig);
+			signal(event);
+		}
 	}
 }
 
