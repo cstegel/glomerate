@@ -58,12 +58,13 @@ namespace ecs
 
 	inline EntityManager::EntityManager()
 	{
-		// entity 0 is reserved for the NULL Entity
-		nextEntityIndex = 1;
-
 		// update data structures for the NULL Entity
 		compMgr.entCompMasks.resize(1);
 		entIndexToGen.push_back(0);
+
+		// NULL entity is special because it isn't considered alive
+		// so we don't try to delete it when deleting all entities
+		indexIsAlive.push_back(false);
 	}
 
 	inline Entity EntityManager::NewEntity()
@@ -76,21 +77,23 @@ namespace ecs
 			freeEntityIndexes.pop();
 			gen = entIndexToGen.at(i);  // incremented at Entity destruction
 			Assert(compMgr.entCompMasks[i] == ComponentManager::ComponentMask(),
-				"expected ent comp mask to be reset at destruction but it wasn't");
-			compMgr.entCompMasks[i] = ComponentManager::ComponentMask();
+				"expected comp mask to be reset at destruction but it wasn't");
+			indexIsAlive[i] = true;
 		}
 		else
 		{
-			i = nextEntityIndex++;
+			i = entIndexToGen.size();
 			gen = 0;
 			entIndexToGen.push_back(gen);
+			indexIsAlive.push_back(true);
 
 			// add a blank comp mask without copying one in
 			compMgr.entCompMasks.resize(compMgr.entCompMasks.size() + 1);
-
-			Assert(entIndexToGen.size() == nextEntityIndex);
-			Assert(compMgr.entCompMasks.size() == nextEntityIndex);
 		}
+
+		// all 3 of these data structures have 1 entry per Entity index
+		Assert(entIndexToGen.size() == indexIsAlive.size());
+		Assert(entIndexToGen.size() == compMgr.entCompMasks.size());
 
 		return Entity(this, Entity::Id(i, gen));
 	}
@@ -102,9 +105,12 @@ namespace ecs
 		if (!Valid(e))
 		{
 			std::stringstream ss;
-			ss << "entity " << e << " is not valid; it may have already been destroyed.";
+			ss << "entity " << e
+			   << " is not valid; it may have already been destroyed.";
 			throw std::invalid_argument(ss.str());
 		}
+
+		Assert(indexIsAlive[e.Index()] == true);
 
 		// notify any subscribers of this entity's death before killing it
 		this->Emit(e, EntityDestruction());
@@ -122,6 +128,16 @@ namespace ecs
 		RemoveAllComponents(e);
 		entIndexToGen.at(e.Index())++;
 		freeEntityIndexes.push(e.Index());
+		indexIsAlive[e.Index()] = false;
+	}
+
+	inline void EntityManager::DestroyAll()
+	{
+		for (uint64 i = 1; i < indexIsAlive.size(); ++i) {
+			if (indexIsAlive.at(i)) {
+				Destroy(Entity::Id(i, entIndexToGen.at(i)));
+			}
+		}
 	}
 
 	inline bool EntityManager::Valid(Entity::Id e) const

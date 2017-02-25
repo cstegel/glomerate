@@ -69,6 +69,11 @@ namespace ecs
 		void Destroy(Entity::Id e);
 
 		/**
+		 * Equivalent way of calling Destroy() on every Entity in the ECS.
+		 */
+		void DestroyAll();
+
+		/**
 		 * Check if the entity is still valid in the system.
 		 * An entity is invalid if it is not currently present in the system.
 		 * Since Entity::Id and Entity objects are often passed by value it is useful
@@ -204,10 +209,24 @@ namespace ecs
 	private:
 		static const size_t RECYCLE_ENTITY_COUNT = 2048;
 
-		vector<Entity::Id> entities;
+		/**
+		 * The current (if index is alive) or next (if index is dead) generation
+		 * for each index (incremented on index death).
+		 */
 		vector<uint16> entIndexToGen;
+
+		/**
+		 * LRU Queue of indexes waiting to be reused.
+		 */
 		std::queue<uint64> freeEntityIndexes;
-		uint64 nextEntityIndex;
+
+		/**
+		 * Once an entity index is allocated we track if that index represents
+		 * an entity that is alive (true) or if that index is waiting to be
+		 * recycled in this->freeEntityIndexes (false).
+		 */
+		vector<bool> indexIsAlive;
+		
 		ComponentManager compMgr;
 
 		/**

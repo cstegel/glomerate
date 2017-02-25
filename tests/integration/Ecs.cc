@@ -393,4 +393,66 @@ namespace test
 
 		ASSERT_EQ(positionBefore, positionAfter);
 	}
+
+	TEST(EcsDestroyAll, DestroysMultipleEntities)
+	{
+		ecs::EntityManager em;
+
+		vector<ecs::Entity> entities;
+		for (int i = 0; i < 10; ++i) {
+			entities.push_back(em.NewEntity());
+		}
+
+		for (auto e : entities) {
+			ASSERT_TRUE(e.Valid());
+		}
+
+		em.DestroyAll();
+
+		for (auto e : entities) {
+			ASSERT_FALSE(e.Valid());
+		}
+	}
+
+	TEST(EcsDestroyAll, DestroysMultipleEntitiesTwice)
+	{
+		ecs::EntityManager em;
+
+		vector<ecs::Entity> entities;
+		for (int i = 0; i < 2; ++i) {
+			entities.clear();
+
+			for (int j = 0; j < 10; ++j) {
+				entities.push_back(em.NewEntity());
+			}
+
+			for (auto e : entities) {
+				ASSERT_TRUE(e.Valid());
+			}
+
+			em.DestroyAll();
+
+			for (auto e : entities) {
+				ASSERT_FALSE(e.Valid());
+			}
+		}
+	}
+
+	TEST(EcsDestroyAll, NoExceptionsThrownWhenNoEntitiesEverAlive)
+	{
+		ecs::EntityManager em;
+		em.DestroyAll();
+	}
+
+	TEST(EcsDestroyAll, NoExceptionsThrownWhenNoEntitiesStillAlive)
+	{
+		ecs::EntityManager em;
+
+		for (uint i = 0; i < 10; ++i) {
+			em.NewEntity();
+		}
+
+		em.DestroyAll(); // clear all entities
+		em.DestroyAll(); // ensure no exceptions raised
+	}
 }
