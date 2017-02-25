@@ -68,8 +68,16 @@ namespace ecs
 		EntityManager *GetManager();
 		Id GetId() const;
 
-		// retrieves the unique identifier for this entity
+		/**
+		 * Retrieve the unique identifier for this Entity
+		 */
 		uint64 Index() const;
+
+		/**
+		 * Retrieve the generation of this Entity
+		 * (should not matter to API users)
+		 */
+		uint16 Generation() const;
 
 		/**
 		 * Remove the given entity from the ECS.

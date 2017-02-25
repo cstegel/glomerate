@@ -80,6 +80,11 @@ namespace ecs
 		return eid.Index();
 	}
 
+	inline uint16 Entity::Generation() const
+	{
+		return eid.Generation();
+	}
+
 	template <typename CompType, typename ...T>
 	Handle<CompType> Entity::Assign(T... args)
 	{

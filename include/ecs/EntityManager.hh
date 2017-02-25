@@ -14,6 +14,16 @@
 #include "Handle.hh"
 #include "Subscription.hh"
 
+/**
+ * how big the recycle pool must be before it starts being used instead
+ * of allocating new entity indexes. This ensures that rapid creation/deletion
+ * of entities doesn't rapidly increase the generation of an entity and instead
+ * spreads the reuse of entity indexes more evenly.
+ */
+#ifndef ECS_ENTITY_RECYCLE_COUNT
+#define ECS_ENTITY_RECYCLE_COUNT 2048u
+#endif
+
 namespace ecs
 {
 	class EntityManager
@@ -207,8 +217,6 @@ namespace ecs
 		void Emit(const Event &event);
 
 	private:
-		static const size_t RECYCLE_ENTITY_COUNT = 2048;
-
 		/**
 		 * The current (if index is alive) or next (if index is dead) generation
 		 * for each index (incremented on index death).
@@ -226,7 +234,7 @@ namespace ecs
 		 * recycled in this->freeEntityIndexes (false).
 		 */
 		vector<bool> indexIsAlive;
-		
+
 		ComponentManager compMgr;
 
 		/**

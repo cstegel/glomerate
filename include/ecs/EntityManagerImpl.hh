@@ -71,7 +71,7 @@ namespace ecs
 	{
 		uint64 i;
 		uint16 gen;
-		if (freeEntityIndexes.size() >= RECYCLE_ENTITY_COUNT)
+		if (freeEntityIndexes.size() >= ECS_ENTITY_RECYCLE_COUNT)
 		{
 			i = freeEntityIndexes.front();
 			freeEntityIndexes.pop();

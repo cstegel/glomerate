@@ -455,4 +455,53 @@ namespace test
 		em.DestroyAll(); // clear all entities
 		em.DestroyAll(); // ensure no exceptions raised
 	}
+
+	TEST(EcsRecycle, EntitiesGetRecycledAfterManyAreDestroyed)
+	{
+		ecs::EntityManager em;
+		ecs::Entity e = em.NewEntity();
+
+		uint64 entitiesMade = 0;
+		const uint64 tooMany = 1000000;
+
+		while (e.Generation() <= 0 && entitiesMade < tooMany) {
+			e.Destroy();
+			e = em.NewEntity();
+			entitiesMade += 1;
+		}
+
+		ASSERT_LT(entitiesMade, tooMany)
+			<< "entities were never recycled";
+	}
+	
+	TEST(EcsRecycle, RecycledEntitiesDontHaveOldComponents)
+	{
+		ecs::EntityManager em;
+		ecs::Entity e = em.NewEntity();
+		e.Assign<Position>(1, 1);
+
+		uint64 entitiesMade = 1;
+		const uint64 tooMany = 1000000;
+
+		while (e.Generation() <= 0 && entitiesMade < tooMany) {
+			e.Destroy();
+			e = em.NewEntity();
+			e.Assign<Position>(1, 1);
+			entitiesMade += 1;
+		}
+
+		ASSERT_LT(entitiesMade, tooMany)
+			<< "failed to trigger recycling of entities after "
+			<< entitiesMade << " were created and destroyed";
+
+		e.Destroy();
+		e = em.NewEntity();
+		entitiesMade += 1;
+
+		ASSERT_GE(e.Generation(), 1)
+			<< "failed to trigger recycling of entities after "
+			<< entitiesMade << " were created and destroyed";
+
+		ASSERT_FALSE(e.Has<Position>());
+	}
 }
