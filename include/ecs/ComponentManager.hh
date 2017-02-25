@@ -21,6 +21,11 @@ namespace ecs
 	public:
 		typedef std::bitset<MAX_COMPONENT_TYPES> ComponentMask;
 
+		~ComponentManager()
+		{
+			for (auto pool : componentPools) delete pool;
+		}
+
 		template <typename CompType, typename ...T>
 		Handle<CompType> Assign(Entity::Id e, T... args);
 
