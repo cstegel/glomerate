@@ -86,8 +86,8 @@ using std::cout;
 using std::endl;
 
 // Event
-struct IncomingMissle {
-    IncomingMissle(int x, int y) : x(x), y(y) {}
+struct IncomingMissile {
+    IncomingMissile(int x, int y) : x(x), y(y) {}
     int x, y;
 };
 
@@ -136,36 +136,36 @@ int main(int argc, char **argv)
     ecs::Entity player = em.NewEntity();
     auto playerChar = player.Assign<Character>(1, 1, "John Cena");
 
-    // player will be smart and moves out of the way of missles
-    auto intelligence = [](ecs::Entity e, const IncomingMissle &missle) {
+    // player will be smart and moves out of the way of missiles
+    auto intelligence = [](ecs::Entity e, const IncomingMissile &missile) {
         ecs::Handle<Character> character = e.Get<Character>();
-        if (character->x == missle.x && character->y == missle.y) {
+        if (character->x == missile.x && character->y == missile.y) {
             // we better move...
             cout << character->name << " has moved out of the way!" << endl;
             character->x += 10;
         }
     };
 
-    ecs::Subscription sub = player.Subscribe<IncomingMissle>(intelligence);
+    ecs::Subscription sub = player.Subscribe<IncomingMissile>(intelligence);
 
     // We can also use functors (be sure to pass by std::ref to maintain state)
     ExplosionHandler explosionHandler;
     em.Subscribe<Explosion>(std::ref(explosionHandler));
 
-    cout << "Firing a missle at " << playerChar->name << endl;
-    int missleX = playerChar->x;
-    int missleY = playerChar->y;
-    player.Emit(IncomingMissle(missleX, missleY));
-    player.Emit(Explosion(missleX, missleY));
+    cout << "Firing a missile at " << playerChar->name << endl;
+    int missileX = playerChar->x;
+    int missileY = playerChar->y;
+    player.Emit(IncomingMissile(missileX, missileY));
+    player.Emit(Explosion(missileX, missileY));
 
     cout << playerChar->name << " stops paying attention (Uh oh)" << endl;
     sub.Unsubscribe();
 
-    cout << "Firing a missle at " << playerChar->name << endl;
-    missleX = playerChar->x;
-    missleY = playerChar->y;
-    player.Emit(IncomingMissle(missleX, missleY));
-    player.Emit(Explosion(missleX, missleY));
+    cout << "Firing a missile at " << playerChar->name << endl;
+    missileX = playerChar->x;
+    missileY = playerChar->y;
+    player.Emit(IncomingMissile(missileX, missileY));
+    player.Emit(Explosion(missileX, missileY));
 
     cout << "The explosion handler saw " << explosionHandler.explosionsSeen
          << " explosions" << endl;
@@ -178,10 +178,10 @@ int main(int argc, char **argv)
 This program produces the following output:
 
 ```
-Firing a missle at John Cena
+Firing a missile at John Cena
 John Cena has moved out of the way!
 John Cena stops paying attention (Uh oh)
-Firing a missle at John Cena
+Firing a missile at John Cena
 John Cena has died
 The explosion handler saw 2 explosions
 ```
