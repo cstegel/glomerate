@@ -41,4 +41,9 @@ namespace ecs
 		}
 		return compPool->Get(eId);
 	}
+
+	template <typename CompType>
+	bool Handle<CompType>::operator!() const {
+		return compPool == nullptr || eId == Entity::Id();
+	}
 }

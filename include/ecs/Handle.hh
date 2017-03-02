@@ -22,6 +22,7 @@ namespace ecs
 
 		CompType &operator*() const;
 		CompType *operator->() const;
+		bool operator!() const;
 
 	private:
 		Entity::Id eId;
