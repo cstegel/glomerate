@@ -39,7 +39,7 @@ namespace ecs
 
 	inline std::ostream &operator<<(std::ostream &os, const Entity::Id e)
 	{
-		os << "(Index: " << e.Index() << ", Gen: " << e.Generation() << ")";
+		os << e.ToString();
 		return os;
 	}
 

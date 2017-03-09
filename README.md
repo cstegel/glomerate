@@ -57,8 +57,23 @@ int main(int argc, char **argv)
 Output:
 
 ```c++
-(Index: 1, Gen: 0) has x: 1, y: 2,  z: 3
+1@0 has x: 1, y: 2,  z: 3
 ```
+
+# Entity IDs
+
+An `Entity::Id` is an opaque 64-bit integer that uniquely represents an entity.
+It may be passed by value or cached and will remain usable until the entity is
+destroyed.
+
+Applications usually treat `Entity::Id` as an indivisible type, however it is
+useful to understand the implementation details. IDs are composed of an *index*
+and *generation*. When an entity is destroyed, the index is returned to the
+pool of available indexes, and the generation for that index is incremented.
+To check if an entity is destroyed, use `Entity::Valid()`, which compares the
+entity's generation with the current generation for its index.
+
+The string representation of an Entity is in the format `index@generation`.
 
 # Events
 
