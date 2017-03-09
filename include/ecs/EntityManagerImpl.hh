@@ -153,7 +153,7 @@ namespace ecs
 	inline EntityManager::EntityCollection EntityManager::EntitiesWith(ComponentManager::ComponentMask compMask)
 	{
 		// find the smallest size component pool to iterate over
-		uint64 minSize;
+		uint64 minSize = ~0;
 		int minSizeCompIndex = -1;
 
 		for (size_t i = 0; i < compMgr.ComponentTypeCount(); ++i)
