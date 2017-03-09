@@ -35,8 +35,8 @@ namespace ecs
 			Id &operator=(const Id &) & = default;
 
 			uint64 Index() const;
-
 			uint64 Generation() const;
+			string ToString() const;
 
 			bool operator==(const Id &other) const;
 			bool operator!=(const Id &other) const;
@@ -78,6 +78,11 @@ namespace ecs
 		 * (should not matter to API users)
 		 */
 		uint16 Generation() const;
+
+		/**
+		 * Retrieve a unique string representation of this Entity
+		 */
+		string ToString() const;
 
 		/**
 		 * Remove the given entity from the ECS.
