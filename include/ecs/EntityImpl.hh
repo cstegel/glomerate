@@ -17,6 +17,11 @@ namespace ecs
 		return (id >> INDEX_BITS);
 	}
 
+	inline string Entity::Id::ToString() const
+	{
+		return std::to_string(Index()) + "@" + std::to_string(Generation());
+	}
+
 	inline bool Entity::Id::operator==(const Id &other) const
 	{
 		return id == other.id;
@@ -34,7 +39,7 @@ namespace ecs
 
 	inline std::ostream &operator<<(std::ostream &os, const Entity::Id e)
 	{
-		os << "(Index: " << e.Index() << ", Gen: " << e.Generation() << ")";
+		os << e.ToString();
 		return os;
 	}
 
@@ -83,6 +88,11 @@ namespace ecs
 	inline uint16 Entity::Generation() const
 	{
 		return eid.Generation();
+	}
+
+	inline string Entity::ToString() const
+	{
+		return eid.ToString();
 	}
 
 	template <typename CompType, typename ...T>
