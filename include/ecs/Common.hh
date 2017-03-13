@@ -32,6 +32,7 @@ namespace ecs
 #else
 	typedef uint64 id_t;
 #endif
+	typedef uint16 gen_t;
 }
 
 #ifndef GLOMERATE_MAP_TYPE

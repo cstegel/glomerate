@@ -22,14 +22,14 @@ namespace ecs
 		class Iterator : public std::iterator<std::input_iterator_tag, Entity::Id>
 		{
 		public:
-			Iterator(BaseComponentPool &pool, uint64 compIndex);
+			Iterator(BaseComponentPool &pool, size_t compIndex);
 			Iterator &operator++();
 			bool operator==(const Iterator &other);
 			bool operator!=(const Iterator &other);
 			Entity::Id operator*();
 		private:
 			BaseComponentPool &pool;
-			uint64 compIndex;
+			size_t compIndex;
 		};
 
 		ComponentPoolEntityCollection(BaseComponentPool &pool);
@@ -37,7 +37,7 @@ namespace ecs
 		Iterator end();
 	private:
 		BaseComponentPool &pool;
-		uint64 lastCompIndex;
+		size_t lastCompIndex;
 	};
 
 	// These classes are meant to be internal to the ECS system and should not be known
@@ -64,7 +64,7 @@ namespace ecs
 
 		virtual void Remove(Entity::Id e) = 0;
 		virtual bool HasComponent(Entity::Id e) const = 0;
-		virtual uint64 Size() const = 0;
+		virtual size_t Size() const = 0;
 		virtual ComponentPoolEntityCollection Entities() = 0;
 
 		// as long as the resultant lock is not destroyed, the order that iteration occurs
@@ -79,7 +79,7 @@ namespace ecs
 		virtual void toggleSoftRemove(bool enabled) = 0;
 
 		// method used by ComponentPoolEntityCollection::Iterator to find the next Entity
-		virtual Entity::Id entityAt(uint64 compIndex) = 0;
+		virtual Entity::Id entityAt(size_t compIndex) = 0;
 
 	};
 
@@ -108,25 +108,25 @@ namespace ecs
 		CompType *Get(Entity::Id e);
 		void Remove(Entity::Id e) override;
 		bool HasComponent(Entity::Id e) const override;
-		uint64 Size() const override;
+		size_t Size() const override;
 		ComponentPoolEntityCollection Entities() override;
 
 		unique_ptr<BaseComponentPool::IterateLock> CreateIterateLock() override;
 
 	private:
-		static const uint64 INVALID_COMP_INDEX = static_cast<uint64>(-1);
+		static const size_t INVALID_COMP_INDEX = static_cast<size_t>(-1);
 
 		vector<std::pair<Entity::Id, CompType> > components;
-		uint64 lastCompIndex;
-		GLOMERATE_MAP_TYPE<uint64, uint64> entIndexToCompIndex;
+		size_t lastCompIndex;
+		GLOMERATE_MAP_TYPE<id_t, size_t> entIndexToCompIndex;
 		bool softRemoveMode;
-		std::queue<uint64> softRemoveCompIndexes;
+		std::queue<size_t> softRemoveCompIndexes;
 
 		void toggleSoftRemove(bool enabled) override;
 
-		void softRemove(uint64 compIndex);
-		void remove(uint64 compIndex);
+		void softRemove(size_t compIndex);
+		void remove(size_t compIndex);
 
-		Entity::Id entityAt(uint64 compIndex) override;
+		Entity::Id entityAt(size_t compIndex) override;
 	};
 }

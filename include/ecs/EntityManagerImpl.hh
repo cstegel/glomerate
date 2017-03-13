@@ -69,8 +69,8 @@ namespace ecs
 
 	inline Entity EntityManager::NewEntity()
 	{
-		uint64 i;
-		uint16 gen;
+		id_t i;
+		gen_t gen;
 		if (freeEntityIndexes.size() >= ECS_ENTITY_RECYCLE_COUNT)
 		{
 			i = freeEntityIndexes.front();
@@ -133,7 +133,7 @@ namespace ecs
 
 	inline void EntityManager::DestroyAll()
 	{
-		for (uint64 i = 1; i < indexIsAlive.size(); ++i) {
+		for (id_t i = 1; i < indexIsAlive.size(); ++i) {
 			if (indexIsAlive.at(i)) {
 				Destroy(Entity::Id(i, entIndexToGen.at(i)));
 			}
@@ -153,7 +153,7 @@ namespace ecs
 	inline EntityManager::EntityCollection EntityManager::EntitiesWith(ComponentManager::ComponentMask compMask)
 	{
 		// find the smallest size component pool to iterate over
-		uint64 minSize = ~0;
+		size_t minSize = ~0;
 		int minSizeCompIndex = -1;
 
 		for (size_t i = 0; i < compMgr.ComponentTypeCount(); ++i)
@@ -163,7 +163,7 @@ namespace ecs
 				continue;
 			}
 
-			uint64 compSize = compMgr.componentPools.at(i)->Size();
+			size_t compSize = compMgr.componentPools.at(i)->Size();
 
 			if (minSizeCompIndex == -1 || compSize < minSize)
 			{

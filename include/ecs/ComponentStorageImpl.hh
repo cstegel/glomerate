@@ -41,7 +41,7 @@ namespace ecs
 // ComponentPoolEntityCollection::Iterator
 namespace ecs
 {
-	inline ComponentPoolEntityCollection::Iterator::Iterator(BaseComponentPool &pool, uint64 compIndex)
+	inline ComponentPoolEntityCollection::Iterator::Iterator(BaseComponentPool &pool, size_t compIndex)
 		: pool(pool), compIndex(compIndex)
 	{}
 
@@ -84,7 +84,7 @@ namespace ecs
 	template <typename CompType>
 	ComponentPool<CompType>::ComponentPool()
 	{
-		lastCompIndex = static_cast<uint64>(-1);
+		lastCompIndex = static_cast<size_t>(-1);
 		softRemoveMode = false;
 	}
 
@@ -98,7 +98,7 @@ namespace ecs
 	template <typename ...T>
 	CompType *ComponentPool<CompType>::NewComponent(Entity::Id e, T... args)
 	{
-		uint64 newCompIndex = lastCompIndex + 1;
+		size_t newCompIndex = lastCompIndex + 1;
 		lastCompIndex = newCompIndex;
 
 		if (components.size() == newCompIndex)
@@ -124,7 +124,7 @@ namespace ecs
 			return nullptr;
 		}
 
-		uint64 compIndex = entIndexToCompIndex.at(e.Index());
+		size_t compIndex = entIndexToCompIndex.at(e.Index());
 		return &components.at(compIndex).second;
 	}
 
@@ -136,7 +136,7 @@ namespace ecs
 			throw std::runtime_error("cannot remove component because the entity does not have one");
 		}
 
-		uint64 removeIndex = entIndexToCompIndex.at(e.Index());
+		size_t removeIndex = entIndexToCompIndex.at(e.Index());
 		entIndexToCompIndex.at(e.Index()) = ComponentPool<CompType>::INVALID_COMP_INDEX;
 
 		if (softRemoveMode)
@@ -150,7 +150,7 @@ namespace ecs
 	}
 
 	template <typename CompType>
-	void ComponentPool<CompType>::remove(uint64 compIndex)
+	void ComponentPool<CompType>::remove(size_t compIndex)
 	{
 		if (compIndex != lastCompIndex)
 		{
@@ -162,7 +162,7 @@ namespace ecs
 			// update the entity -> component index mapping of swapped component
 			// if it's entity still exists
 			// (Entity could have been deleted while iterating over entities so the component was only soft-deleted till now)
-			uint64 entityIndex = validComponentPair.first.Index();
+			id_t entityIndex = validComponentPair.first.Index();
 			if (entIndexToCompIndex.count(entityIndex) > 0)
 			{
 				entIndexToCompIndex.at(entityIndex) = compIndex;
@@ -173,7 +173,7 @@ namespace ecs
 	}
 
 	template <typename CompType>
-	void ComponentPool<CompType>::softRemove(uint64 compIndex)
+	void ComponentPool<CompType>::softRemove(size_t compIndex)
 	{
 		// mark the component as the "Null" Entity and add this component index to queue of
 		// components to be deleted when "soft remove" mode is disabled.
@@ -192,7 +192,7 @@ namespace ecs
 	}
 
 	template <typename CompType>
-	uint64 ComponentPool<CompType>::Size() const
+	size_t ComponentPool<CompType>::Size() const
 	{
 		return lastCompIndex + 1;
 	}
@@ -217,7 +217,7 @@ namespace ecs
 			// must perform proper removes for everything that has been "soft removed"
 			while (!softRemoveCompIndexes.empty())
 			{
-				uint64 compIndex = softRemoveCompIndexes.front();
+				size_t compIndex = softRemoveCompIndexes.front();
 				softRemoveCompIndexes.pop();
 				remove(compIndex);
 			}
@@ -227,7 +227,7 @@ namespace ecs
 	}
 
 	template <typename CompType>
-	Entity::Id ComponentPool<CompType>::entityAt(uint64 compIndex)
+	Entity::Id ComponentPool<CompType>::entityAt(size_t compIndex)
 	{
 		Assert(compIndex < components.size());
 		return components[compIndex].first;

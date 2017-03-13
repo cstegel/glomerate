@@ -473,7 +473,7 @@ namespace test
 		ASSERT_LT(entitiesMade, tooMany)
 			<< "entities were never recycled";
 	}
-	
+
 	TEST(EcsRecycle, RecycledEntitiesDontHaveOldComponents)
 	{
 		ecs::EntityManager em;
@@ -498,7 +498,7 @@ namespace test
 		e = em.NewEntity();
 		entitiesMade += 1;
 
-		ASSERT_GE(e.Generation(), 1)
+		ASSERT_GE(e.Generation(), 1u)
 			<< "failed to trigger recycling of entities after "
 			<< entitiesMade << " were created and destroyed";
 
