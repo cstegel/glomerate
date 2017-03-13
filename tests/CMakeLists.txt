@@ -37,7 +37,7 @@ foreach(entity_bits 64 32)
 
 		if (${entity_bits} EQUAL 32)
 			target_compile_definitions(${test_exe}
-				PRIVATE "-DGLOMERATE_32_BIT_ENTITIES")
+				PRIVATE "-DGLOMERATE_32BIT_ENTITIES")
 		endif()
 
 		# target to run the tests

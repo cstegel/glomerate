@@ -25,6 +25,15 @@ typedef int32_t int32;
 typedef uint64_t uint64;
 typedef int64_t int64;
 
+namespace ecs
+{
+#ifdef GLOMERATE_32BIT_ENTITIES
+	typedef uint32 id_t;
+#else
+	typedef uint64 id_t;
+#endif
+}
+
 #ifndef GLOMERATE_MAP_TYPE
 #include <unordered_map>
 #define GLOMERATE_MAP_TYPE std::unordered_map

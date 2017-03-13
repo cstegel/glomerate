@@ -4,6 +4,8 @@
 #include "ecs/Common.hh"
 #include "ecs/Subscription.hh"
 
+
+
 namespace ecs
 {
 	class EntityManager;
@@ -26,9 +28,14 @@ namespace ecs
 			friend class EntityManager;
 		public:
 
+#ifdef GLOMERATE_32BIT_ENTITIES
+			static const uint16 INDEX_BITS = 48;
+#else
+			static const uint16 INDEX_BITS = 22;
+#endif
+
 			// the rest of the bits are for the generation
-			static const uint32 INDEX_BITS = 48;
-			static const uint64 INDEX_MASK = ((uint64)1 << INDEX_BITS) - 1;
+			static const id_t INDEX_MASK = ((id_t)1 << INDEX_BITS) - 1;
 
 			Id() : Id(NULL_ID) {};
 			Id(const Id &) = default;
