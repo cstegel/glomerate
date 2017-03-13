@@ -201,12 +201,6 @@ John Cena has died
 The explosion handler saw 2 explosions
 ```
 
-# Tests
-
-Existing tests can be run on linux with "make tests" to run integration and unit tests or "make integration-tests" / "make unit-tests" to run the individual suites.
-
-googletest library is used to help with testing and it will automatically be cloned from github into the ```ext/``` directory when compiling the tests for the first time.
-
 # Customizations
 
 ## Entity Id size
@@ -234,6 +228,15 @@ including any Glomerate header. For instance:
 ```
 
 Any type with a similar interface can be used.
+
+# Tests
+
+Tests exist for both amd64 and x86 architectures with both 32-bit and 64-bit entities.
+All existing tests can be run on linux with `make tests` to run integration and unit tests or `make integration-tests` / `make unit-tests` to run the individual suites.
+
+Test runs can also be much more specific such as `make integration-tests-amd64-64bit`. See `Makefile` for a full list of test targets.
+
+googletest library is used to help with testing and it will automatically be cloned from github into the `ext/` directory when compiling the tests for the first time.
 
 # License
 
