@@ -504,4 +504,15 @@ namespace test
 
 		ASSERT_FALSE(e.Has<Position>());
 	}
+
+	TEST(EcsBasic, EntitySize)
+	{
+#ifdef GLOMERATE_32BIT_ENTITIES
+		ASSERT_EQ(4u, sizeof(ecs::id_t));
+		ASSERT_EQ(4u, sizeof(ecs::Entity::Id().Index()));
+#else
+		ASSERT_EQ(8u, sizeof(ecs::id_t));
+		ASSERT_EQ(8u, sizeof(ecs::Entity::Id().Index()));
+#endif
+	}
 }
