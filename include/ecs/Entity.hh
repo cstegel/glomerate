@@ -4,6 +4,8 @@
 #include "ecs/Common.hh"
 #include "ecs/Subscription.hh"
 
+
+
 namespace ecs
 {
 	class EntityManager;
@@ -26,16 +28,21 @@ namespace ecs
 			friend class EntityManager;
 		public:
 
+#ifdef GLOMERATE_32BIT_ENTITIES
+			static const uint8 INDEX_BITS = 22;
+#else
+			static const uint8 INDEX_BITS = 48;
+#endif
+
 			// the rest of the bits are for the generation
-			static const uint32 INDEX_BITS = 48;
-			static const uint64 INDEX_MASK = ((uint64)1 << INDEX_BITS) - 1;
+			static const id_t INDEX_MASK = ((id_t)1 << INDEX_BITS) - 1;
 
 			Id() : Id(NULL_ID) {};
 			Id(const Id &) = default;
 			Id &operator=(const Id &) & = default;
 
-			uint64 Index() const;
-			uint64 Generation() const;
+			id_t Index() const;
+			gen_t Generation() const;
 			string ToString() const;
 
 			bool operator==(const Id &other) const;
@@ -45,12 +52,12 @@ namespace ecs
 			friend std::ostream &operator<<(std::ostream &os, const Id e);
 
 		private:
-			Id(uint64 index, uint16 generation);
-			Id(uint64 id): id(id) {}
+			Id(id_t index, gen_t generation);
+			Id(id_t id): id(id) {}
 
-			static const uint64 NULL_ID = 0;
+			static const id_t NULL_ID = 0;
 
-			uint64 id;
+			id_t id;
 		};
 
 		Entity();
@@ -71,13 +78,13 @@ namespace ecs
 		/**
 		 * Retrieve the unique identifier for this Entity
 		 */
-		uint64 Index() const;
+		id_t Index() const;
 
 		/**
 		 * Retrieve the generation of this Entity
 		 * (should not matter to API users)
 		 */
-		uint16 Generation() const;
+		gen_t Generation() const;
 
 		/**
 		 * Retrieve a unique string representation of this Entity
@@ -161,7 +168,7 @@ namespace std
 	{
 		size_t operator()(const ecs::Entity &e) const
 		{
-			return hash<uint64>()(e.eid.id);
+			return hash<id_t>()(e.eid.id);
 		}
 	};
 
@@ -171,7 +178,7 @@ namespace std
 	{
 		size_t operator()(const ecs::Entity::Id &e) const
 		{
-			return hash<uint64>()(e.id);
+			return hash<id_t>()(e.id);
 		}
 	};
 }

@@ -14,12 +14,7 @@ if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS /wd4800 /MP)
 endif()
 
-if (FORCE_32BIT)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin_32)
-else()
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-endif()
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
@@ -48,9 +43,9 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
 # Build tests
 ################################################
 
-OPTION(BUILD_TESTS "Build test executables" OFF)
-IF (BUILD_TESTS)
+OPTION(GLOMERATE_BUILD_TESTS "Build test executables" OFF)
+IF (GLOMERATE_BUILD_TESTS)
 	set(GOOGLETEST_DIR ${EXT_PATH}/googletest/googletest)
 	add_subdirectory(${EXT_PATH}/googletest)
 	add_subdirectory(tests)
-ENDIF (BUILD_TESTS)
+ENDIF ()

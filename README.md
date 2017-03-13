@@ -62,7 +62,7 @@ Output:
 
 # Entity IDs
 
-An `Entity::Id` is an opaque 64-bit integer that uniquely represents an entity.
+An `Entity::Id` is an opaque integer (defaults to 64-bit) that uniquely represents an entity.
 It may be passed by value or cached and will remain usable until the entity is
 destroyed.
 
@@ -201,17 +201,24 @@ John Cena has died
 The explosion handler saw 2 explosions
 ```
 
-# Tests
+# Customizations
 
-Existing tests can be run on linux with "make tests" to run integration and unit tests or "make integration-tests" / "make unit-tests" to run the individual suites.
+## Entity Id size
 
-googletest library is used to help with testing and it will automatically be cloned from github into the ```ext/``` directory when compiling the tests for the first time.
+32 bit Entity Ids can be used instead of 64 bit Ids by defining  `GLOMERATE_32BIT_ENTITIES` before including any Glomerate header. For instance:
 
-# Performance
+```c++
+#define GLOMERATE_32BIT_ENTITIES
+#include <Ecs.hh>
+```
+
+By default, Glomerate uses 64 bit unsigned integers to represent an Entity. Most of the bits are used for the _index_ and the rest for the _generation_. For 32 bit Ids 22 bits are used for the _index_ and 10 for the _generation_. This allows roughly 4 million simultaneous entities whereas 48 bits (the default for 64 bit Ids) allows about 281 trillion simulataneous entities. If you don't need more than a couple million entities or you are building your application for a 32 bit platform you may see a speedup by using 32 bit Ids.
+
+## Performance
 
 By default, Glomerate uses std::unordered_map for storing indexes. On some
 platforms (in particular VC++), std::unordered_map performs poorly and should
-be replaced. This can be done by defining the GLOMERATE_MAP_TYPE macro before
+be replaced. This can be done by defining the `GLOMERATE_MAP_TYPE` macro before
 including any Glomerate header. For instance:
 
 ```c++
@@ -221,6 +228,15 @@ including any Glomerate header. For instance:
 ```
 
 Any type with a similar interface can be used.
+
+# Tests
+
+Tests exist for both amd64 and x86 architectures with both 32-bit and 64-bit entities.
+All existing tests can be run on linux with `make tests` to run integration and unit tests or `make integration-tests` / `make unit-tests` to run the individual suites.
+
+Test runs can also be much more specific such as `make integration-tests-amd64-64bit`. See `Makefile` for a full list of test targets.
+
+googletest library is used to help with testing and it will automatically be cloned from github into the `ext/` directory when compiling the tests for the first time.
 
 # License
 

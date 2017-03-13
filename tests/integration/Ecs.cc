@@ -473,7 +473,7 @@ namespace test
 		ASSERT_LT(entitiesMade, tooMany)
 			<< "entities were never recycled";
 	}
-	
+
 	TEST(EcsRecycle, RecycledEntitiesDontHaveOldComponents)
 	{
 		ecs::EntityManager em;
@@ -498,10 +498,21 @@ namespace test
 		e = em.NewEntity();
 		entitiesMade += 1;
 
-		ASSERT_GE(e.Generation(), 1)
+		ASSERT_GE(e.Generation(), 1u)
 			<< "failed to trigger recycling of entities after "
 			<< entitiesMade << " were created and destroyed";
 
 		ASSERT_FALSE(e.Has<Position>());
+	}
+
+	TEST(EcsBasic, EntitySize)
+	{
+#ifdef GLOMERATE_32BIT_ENTITIES
+		ASSERT_EQ(4u, sizeof(ecs::id_t));
+		ASSERT_EQ(4u, sizeof(ecs::Entity::Id().Index()));
+#else
+		ASSERT_EQ(8u, sizeof(ecs::id_t));
+		ASSERT_EQ(8u, sizeof(ecs::Entity::Id().Index()));
+#endif
 	}
 }

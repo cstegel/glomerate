@@ -221,12 +221,12 @@ namespace ecs
 		 * The current (if index is alive) or next (if index is dead) generation
 		 * for each index (incremented on index death).
 		 */
-		vector<uint16> entIndexToGen;
+		vector<gen_t> entIndexToGen;
 
 		/**
 		 * LRU Queue of indexes waiting to be reused.
 		 */
-		std::queue<uint64> freeEntityIndexes;
+		std::queue<id_t> freeEntityIndexes;
 
 		/**
 		 * Once an entity index is allocated we track if that index represents
