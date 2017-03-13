@@ -11,34 +11,41 @@ include_directories(${project_include_dirs} ${GOOGLETEST_DIR}/include)
 # Test targets
 ################################
 
-if (FORCE_32BIT)
-	set(test_suffix "_32")
-endif()
+foreach(entity_bits 64 32)
+	foreach(test_type unit integration)
+		set(test_target
+		${test_type}-tests_${entity_bits}bit-ents)
+		set(test_exe ecs_${test_target})
 
-foreach(test_type unit integration)
-	set(test_exe ecs-${test_type}-tests${test_suffix})
+		file(GLOB_RECURSE test_sources ${CMAKE_CURRENT_SOURCE_DIR}/${test_type}/*.cc)
+		list(APPEND test_sources ${GOOGLETEST_DIR}/src/gtest_main.cc)
+		list(REMOVE_DUPLICATES test_sources)
 
-	file(GLOB_RECURSE test_sources ${CMAKE_CURRENT_SOURCE_DIR}/${test_type}/*.cc)
-	list(APPEND test_sources ${GOOGLETEST_DIR}/src/gtest_main.cc)
-	list(REMOVE_DUPLICATES test_sources)
+		file(GLOB_RECURSE test_headers ${CMAKE_CURRENT_SOURCE_DIR}/${test_type}/*.hh)
+		list(REMOVE_DUPLICATES test_headers)
 
-	file(GLOB_RECURSE test_headers ${CMAKE_CURRENT_SOURCE_DIR}/${test_type}/*.hh)
-	list(REMOVE_DUPLICATES test_headers)
+		add_executable(${test_exe} ${test_sources} ${test_headers})
+		target_link_libraries(${test_exe} gtest gtest_main)
 
-	add_executable(${test_exe} ${test_sources} ${test_headers})
-	target_link_libraries(${test_exe} gtest gtest_main)
+		if (${GLOMERATE_TEST_ARCH} MATCHES "x86")
+			foreach(target ${test_exe} "gtest" "gtest_main")
+				set_target_properties(${target}
+					PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
+			endforeach(target)
 
-	if (FORCE_32BIT)
-		set_target_properties(${test_exe} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-		set_target_properties(gtest PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-		set_target_properties(gtest_main PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-	endif()
+		endif()
 
-	# target to run the tests
-	add_custom_target(
-		${test_type}-tests${test_suffix}
-		COMMAND ${test_exe}
-		DEPENDS ${test_exe}
-	COMMENT "Run ${test_type} tests")
+		if (${entity_bits} EQUAL 32)
+			target_compile_definitions(${test_exe}
+				PRIVATE "-DGLOMERATE_32_BIT_ENTITIES")
+		endif()
 
-endforeach(test_type)
+		# target to run the tests
+		add_custom_target(
+			${test_target}
+			COMMAND ${test_exe}
+			DEPENDS ${test_exe}
+		COMMENT "Run ${test_type} tests for ${entity_bits} bit entities built as an ${GLOMERATE_TEST_ARCH} program")
+
+	endforeach(test_type)
+endforeach(entity_bits)
