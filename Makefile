@@ -1,44 +1,71 @@
-.PHONY: auto compile linux windows clean unit-tests unit-tests-32 \
+.PHONY: \
+	auto \
+	clean \
+	dependencies \
+	tests \
+	tests-amd64 \
+	tests-x86 \
+	unit-tests \
+	unit-tests-amd64 \
+	unit-tests-amd64-32bit \
+	unit-tests-amd64-64bit \
+	unit-tests-x86 \
+	unit-tests-x86-32bit \
+	unit-tests-x86-64bit \
 	integration-tests \
-	integration-tests-32bit \
-	integration-tests-64bit \
+	integration-tests-amd64 \
+	integration-tests-amd64-32bit \
+	integration-tests-amd64-64bit \
 	integration-tests-x86 \
-	integration-tests-32bit-x86 \
-	integration-tests-64bit-x86 \
-	tests tests-x86 astyle dependencies test-cmake \
-	test-cmake-32
+	integration-tests-x86-32bit \
+	integration-tests-x86-64bit \
+	astyle \
+	test-cmake-amd64 \
+	test-cmake-x86
 
-auto: tests
+auto: tests-amd64
 
 clean:
-	rm -rf build bin lib bin_32
+	rm -rf build bin lib
 
 build:
 	mkdir -p build
 
-unit-tests: build test-cmake
-	cd build; make unit-tests
+unit-tests: unit-tests-amd64 unit-tests-x86
 
-unit-tests: build test-cmake-x86
-	cd build; make unit-tests
+unit-tests-amd64: unit-tests-amd64-32bit unit-tests-amd64-64bit
 
-integration-tests: integration-tests-32bit integration-tests-64bit
+unit-tests-amd64-32bit: build test-cmake-amd64
+	cd build; make unit-tests_64bit-ents
 
-integration-tests-32bit: build test-cmake
+unit-tests-amd64-64bit: build test-cmake-amd64
+	cd build; make unit-tests_64bit-ents
+
+unit-tests-x86: unit-tests-x86-32bit unit-tests-x86-64bit
+
+unit-tests-x86-32bit: build test-cmake-x86
+	cd build; make unit-tests_64bit-ents
+
+unit-tests-x86-64bit: build test-cmake-x86
+	cd build; make unit-tests_64bit-ents
+
+integration-tests-amd64: integration-tests-amd64-32bit integration-tests-amd64-64bit
+
+integration-tests-amd64-32bit: build test-cmake-amd64
 	cd build; make integration-tests_32bit-ents
 
-integration-tests-64bit: build test-cmake
+integration-tests-amd64-64bit: build test-cmake-amd64
 	cd build; make integration-tests_64bit-ents
 
 integration-tests-x86: integration-tests-32bit-x86 integration-tests-64bit-x86
 
-integration-tests-32bit-x86: build test-cmake-x86
+integration-tests-x86-32bit: build test-cmake-x86
 	cd build; make integration-tests_32bit-ents
 
-integration-tests-64bit-x86: build test-cmake-x86
+integration-tests-x86-64bit: build test-cmake-x86
 	cd build; make integration-tests_64bit-ents
 
-test-cmake: build dependencies
+test-cmake-amd64: build dependencies
 	cd build; \
 	cmake \
 		-G "Unix Makefiles" \
@@ -56,7 +83,9 @@ test-cmake-x86: build dependencies
 		-DGLOMERATE_TEST_ARCH=x86 \
 		..
 
-tests: unit-tests integration-tests
+tests: tests-amd64 tests-x86
+
+tests-amd64: unit-tests-amd64 integration-tests-amd64
 
 tests-x86: unit-tests-x86 integration-tests-x86
 
