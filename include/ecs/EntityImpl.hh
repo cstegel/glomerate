@@ -47,7 +47,8 @@ namespace ecs
 	{
 		id = (static_cast<id_t>(generation) << INDEX_BITS)
 		   + (index & INDEX_MASK);
-		Assert((id & INDEX_MASK) == index);
+		Assert(Index() == index);
+		Assert(Generation() == generation);
 	}
 }
 
