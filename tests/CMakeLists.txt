@@ -45,7 +45,7 @@ foreach(entity_bits 64 32)
 			${test_target}
 			COMMAND ${test_exe}
 			DEPENDS ${test_exe}
-		COMMENT "Run ${test_type} tests for ${entity_bits} bit entities built as an ${GLOMERATE_TEST_ARCH} program")
+		COMMENT "Run ${test_type} tests for ${entity_bits} bit entities built for ${GLOMERATE_TEST_ARCH} CPU ARCH")
 
 	endforeach(test_type)
 endforeach(entity_bits)

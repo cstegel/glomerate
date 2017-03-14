@@ -2,28 +2,28 @@
 	auto \
 	clean \
 	dependencies \
+	tests-all-arches \
 	tests \
-	tests-amd64 \
 	tests-x86 \
+	unit-tests-all-arches \
 	unit-tests \
-	unit-tests-amd64 \
-	unit-tests-amd64-32bit \
-	unit-tests-amd64-64bit \
+	unit-tests-32bit \
+	unit-tests-64bit \
 	unit-tests-x86 \
 	unit-tests-x86-32bit \
 	unit-tests-x86-64bit \
+	integration-tests-all-arches \
 	integration-tests \
-	integration-tests-amd64 \
-	integration-tests-amd64-32bit \
-	integration-tests-amd64-64bit \
+	integration-tests-32bit \
+	integration-tests-64bit \
 	integration-tests-x86 \
 	integration-tests-x86-32bit \
 	integration-tests-x86-64bit \
 	astyle \
-	test-cmake-amd64 \
+	test-cmake \
 	test-cmake-x86
 
-auto: tests-amd64
+auto: tests
 
 clean:
 	rm -rf build bin lib
@@ -31,32 +31,32 @@ clean:
 build:
 	mkdir -p build
 
-unit-tests: unit-tests-amd64 unit-tests-x86
+unit-tests-all-arches: unit-tests unit-tests-x86
 
-unit-tests-amd64: unit-tests-amd64-32bit unit-tests-amd64-64bit
+unit-tests: unit-tests-32bit unit-tests-64bit
 
-unit-tests-amd64-32bit: build test-cmake-amd64
-	cd build; make unit-tests_64bit-ents
+unit-tests-32bit: build test-cmake
+	cd build; make unit-tests_32bit-ents
 
-unit-tests-amd64-64bit: build test-cmake-amd64
+unit-tests-64bit: build test-cmake
 	cd build; make unit-tests_64bit-ents
 
 unit-tests-x86: unit-tests-x86-32bit unit-tests-x86-64bit
 
 unit-tests-x86-32bit: build test-cmake-x86
-	cd build; make unit-tests_64bit-ents
+	cd build; make unit-tests_32bit-ents
 
 unit-tests-x86-64bit: build test-cmake-x86
 	cd build; make unit-tests_64bit-ents
 
-integration-tests: integration-tests-amd64 integration-tests-x86
+integration-tests-all-arches: integration-tests integration-tests-x86
 
-integration-tests-amd64: integration-tests-amd64-32bit integration-tests-amd64-64bit
+integration-tests: integration-tests-32bit integration-tests-64bit
 
-integration-tests-amd64-32bit: build test-cmake-amd64
+integration-tests-32bit: build test-cmake
 	cd build; make integration-tests_32bit-ents
 
-integration-tests-amd64-64bit: build test-cmake-amd64
+integration-tests-64bit: build test-cmake
 	cd build; make integration-tests_64bit-ents
 
 integration-tests-x86: integration-tests-x86-32bit integration-tests-x86-64bit
@@ -67,13 +67,13 @@ integration-tests-x86-32bit: build test-cmake-x86
 integration-tests-x86-64bit: build test-cmake-x86
 	cd build; make integration-tests_64bit-ents
 
-test-cmake-amd64: build dependencies
+test-cmake: build dependencies
 	cd build; \
 	cmake \
 		-G "Unix Makefiles" \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DGLOMERATE_BUILD_TESTS=ON \
-		-DGLOMERATE_TEST_ARCH=amd64 \
+		-DGLOMERATE_TEST_ARCH=default \
 		..
 
 test-cmake-x86: build dependencies
@@ -85,9 +85,9 @@ test-cmake-x86: build dependencies
 		-DGLOMERATE_TEST_ARCH=x86 \
 		..
 
-tests: tests-amd64 tests-x86
+tests-all-arches: tests tests-x86
 
-tests-amd64: unit-tests-amd64 integration-tests-amd64
+tests: unit-tests integration-tests
 
 tests-x86: unit-tests-x86 integration-tests-x86
 
