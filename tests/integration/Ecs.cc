@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <stdexcept>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include "Ecs.hh"
 
@@ -503,16 +503,5 @@ namespace test
 			<< entitiesMade << " were created and destroyed";
 
 		ASSERT_FALSE(e.Has<Position>());
-	}
-
-	TEST(EcsBasic, EntitySize)
-	{
-#ifdef GLOMERATE_32BIT_ENTITIES
-		ASSERT_EQ(4u, sizeof(ecs::eid_t));
-		ASSERT_EQ(4u, sizeof(ecs::Entity::Id().Index()));
-#else
-		ASSERT_EQ(8u, sizeof(ecs::eid_t));
-		ASSERT_EQ(8u, sizeof(ecs::Entity::Id().Index()));
-#endif
 	}
 }
