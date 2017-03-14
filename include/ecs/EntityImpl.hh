@@ -17,6 +17,11 @@ namespace ecs
 		return (id >> INDEX_BITS);
 	}
 
+	inline id_t Entity::Id::GetId() const
+	{
+		return id;
+	}
+
 	inline string Entity::Id::ToString() const
 	{
 		return std::to_string(Index()) + "@" + std::to_string(Generation());
