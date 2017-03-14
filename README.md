@@ -4,12 +4,18 @@ Glomerate is a header-only, type-safe Entity Component System (ECS) created with
 
 It includes an event system which allows callbacks to be registered for user-defined events (Observer design pattern).
 
+# Background
+
+An ECS is often used in video game programming. Typically, object-oriented inheritance hierarchies are used to represent the game world but this often results in inflexible code. An ECS replaces these inheritance hierarchies to allow for flexible code and often better performance using the software design principles of [composition over inheritance](https://codingdelight.com/2014/01/16/favor-composition-over-inheritance-part-1/) and [data-oriented design](https://gamedevelopment.tutsplus.com/articles/what-is-data-oriented-game-engine-design--cms-21052).
+
+If you want to learn more then [this article](https://www.gamedev.net/resources/_/technical/game-programming/understanding-component-entity-systems-r3013) serves as a good introduction to Entity Component Systems.
+
 # Setup
 
-Glomerate is a header-only library with no external dependencies (outside of testing) so all you need to do to use it is the following:
+Glomerate is a header-only library with no external dependencies (outside of testing) so follow these steps to use it:
 
   1. add Glomerate's ```include``` directory onto your include path when compiling your project.
-  2. ```#include <Ecs.hh>``` in any files you wish to use the library
+  2. ```#include <Ecs.hh>``` in any files where you wish to use the library
 
 It should work on any OS when using a C++11 compliant compiler.
 
@@ -231,10 +237,10 @@ Any type with a similar interface can be used.
 
 # Tests
 
-Tests exist for both amd64 and x86 architectures with both 32-bit and 64-bit entities.
+Tests exist for x86 as well as your PC's architecture with both 32-bit and 64-bit entities.
 All existing tests can be run on linux with `make tests` to run integration and unit tests or `make integration-tests` / `make unit-tests` to run the individual suites.
 
-Test runs can also be much more specific such as `make integration-tests-amd64-64bit`. See `Makefile` for a full list of test targets.
+Test runs can also be much more specific such as `make integration-tests-x86-64bit`. See `Makefile` for a full list of test targets.
 
 googletest library is used to help with testing and it will automatically be cloned from github into the `ext/` directory when compiling the tests for the first time.
 
