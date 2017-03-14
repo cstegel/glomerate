@@ -39,10 +39,14 @@ namespace ecs
 
 			Id() : Id(NULL_ID) {};
 			Id(const Id &) = default;
+			Id(id_t index, gen_t generation);
+			Id(id_t id): id(id) {}
 			Id &operator=(const Id &) & = default;
 
 			id_t Index() const;
 			gen_t Generation() const;
+			id_t GetId() const;
+
 			string ToString() const;
 
 			bool operator==(const Id &other) const;
@@ -52,9 +56,6 @@ namespace ecs
 			friend std::ostream &operator<<(std::ostream &os, const Id e);
 
 		private:
-			Id(id_t index, gen_t generation);
-			Id(id_t id): id(id) {}
-
 			static const id_t NULL_ID = 0;
 
 			id_t id;
@@ -168,7 +169,7 @@ namespace std
 	{
 		size_t operator()(const ecs::Entity &e) const
 		{
-			return hash<id_t>()(e.eid.id);
+			return hash<ecs::id_t>()(e.eid.id);
 		}
 	};
 
@@ -178,7 +179,7 @@ namespace std
 	{
 		size_t operator()(const ecs::Entity::Id &e) const
 		{
-			return hash<id_t>()(e.id);
+			return hash<ecs::id_t>()(e.id);
 		}
 	};
 }
