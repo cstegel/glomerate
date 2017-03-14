@@ -49,6 +49,8 @@ unit-tests-x86-32bit: build test-cmake-x86
 unit-tests-x86-64bit: build test-cmake-x86
 	cd build; make unit-tests_64bit-ents
 
+integration-tests: integration-tests-amd64 integration-tests-x86
+
 integration-tests-amd64: integration-tests-amd64-32bit integration-tests-amd64-64bit
 
 integration-tests-amd64-32bit: build test-cmake-amd64
