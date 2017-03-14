@@ -226,7 +226,7 @@ namespace ecs
 		/**
 		 * LRU Queue of indexes waiting to be reused.
 		 */
-		std::queue<id_t> freeEntityIndexes;
+		std::queue<eid_t> freeEntityIndexes;
 
 		/**
 		 * Once an entity index is allocated we track if that index represents

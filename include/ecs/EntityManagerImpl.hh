@@ -69,7 +69,7 @@ namespace ecs
 
 	inline Entity EntityManager::NewEntity()
 	{
-		id_t i;
+		eid_t i;
 		gen_t gen;
 		if (freeEntityIndexes.size() >= ECS_ENTITY_RECYCLE_COUNT)
 		{
@@ -133,7 +133,7 @@ namespace ecs
 
 	inline void EntityManager::DestroyAll()
 	{
-		for (id_t i = 1; i < indexIsAlive.size(); ++i) {
+		for (eid_t i = 1; i < indexIsAlive.size(); ++i) {
 			if (indexIsAlive.at(i)) {
 				Destroy(Entity::Id(i, entIndexToGen.at(i)));
 			}

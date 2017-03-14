@@ -162,7 +162,7 @@ namespace ecs
 			// update the entity -> component index mapping of swapped component
 			// if it's entity still exists
 			// (Entity could have been deleted while iterating over entities so the component was only soft-deleted till now)
-			id_t entityIndex = validComponentPair.first.Index();
+			eid_t entityIndex = validComponentPair.first.Index();
 			if (entIndexToCompIndex.count(entityIndex) > 0)
 			{
 				entIndexToCompIndex.at(entityIndex) = compIndex;

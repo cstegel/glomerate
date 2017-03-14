@@ -118,7 +118,7 @@ namespace ecs
 
 		vector<std::pair<Entity::Id, CompType> > components;
 		size_t lastCompIndex;
-		GLOMERATE_MAP_TYPE<id_t, size_t> entIndexToCompIndex;
+		GLOMERATE_MAP_TYPE<eid_t, size_t> entIndexToCompIndex;
 		bool softRemoveMode;
 		std::queue<size_t> softRemoveCompIndexes;
 

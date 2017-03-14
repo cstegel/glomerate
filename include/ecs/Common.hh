@@ -28,9 +28,9 @@ typedef int64_t int64;
 namespace ecs
 {
 #ifdef GLOMERATE_32BIT_ENTITIES
-	typedef uint32 id_t;
+	typedef uint32 eid_t;
 #else
-	typedef uint64 id_t;
+	typedef uint64 eid_t;
 #endif
 	typedef uint16 gen_t;
 }

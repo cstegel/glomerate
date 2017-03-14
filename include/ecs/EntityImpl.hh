@@ -7,7 +7,7 @@
 // Entity::Id
 namespace ecs
 {
-	inline id_t Entity::Id::Index() const
+	inline eid_t Entity::Id::Index() const
 	{
 		return id & INDEX_MASK;
 	}
@@ -17,7 +17,7 @@ namespace ecs
 		return (id >> INDEX_BITS);
 	}
 
-	inline id_t Entity::Id::GetId() const
+	inline eid_t Entity::Id::GetId() const
 	{
 		return id;
 	}
@@ -48,9 +48,9 @@ namespace ecs
 		return os;
 	}
 
-	inline Entity::Id::Id(id_t index, gen_t generation)
+	inline Entity::Id::Id(eid_t index, gen_t generation)
 	{
-		id = (static_cast<id_t>(generation) << INDEX_BITS)
+		id = (static_cast<eid_t>(generation) << INDEX_BITS)
 		   + (index & INDEX_MASK);
 		Assert(Index() == index);
 		Assert(Generation() == generation);
@@ -87,7 +87,7 @@ namespace ecs
 		return os;
 	}
 
-	inline id_t Entity::Index() const
+	inline eid_t Entity::Index() const
 	{
 		return eid.Index();
 	}
