@@ -21,7 +21,11 @@
 	integration-tests-x86-64bit \
 	astyle \
 	test-cmake \
-	test-cmake-x86
+	test-cmake-x86 \
+	benchmark-tests \
+	benchmark-tests-cmake \
+	benchmark-tests-glomerate \
+	benchmark-tests-entityx
 
 auto: tests
 
@@ -83,6 +87,22 @@ test-cmake-x86: build dependencies
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DGLOMERATE_BUILD_TESTS=ON \
 		-DGLOMERATE_TEST_ARCH=x86 \
+		..
+
+benchmark: benchmark-glomerate benchmark-entityx
+
+benchmark-glomerate: benchmark-cmake
+	cd build; make benchmark-glomerate
+
+benchmark-entityx: benchmark-cmake
+	cd build; make benchmark-entityx
+
+benchmark-cmake:
+	cd build; \
+	cmake \
+		-G "Unix Makefiles" \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DGLOMERATE_BUILD_BENCHMARK=ON \
 		..
 
 tests-all-arches: tests tests-x86

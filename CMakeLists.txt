@@ -49,3 +49,12 @@ IF (GLOMERATE_BUILD_TESTS)
 	add_subdirectory(${EXT_PATH}/googletest)
 	add_subdirectory(tests)
 ENDIF ()
+
+####################
+# Build benchmarks #
+####################
+
+OPTION(GLOMERATE_BUILD_BENCHMARK "Build benchmark executables" OFF)
+IF (GLOMERATE_BUILD_BENCHMARK)
+	add_subdirectory(benchmarks)
+ENDIF()
