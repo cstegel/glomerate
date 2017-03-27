@@ -9,7 +9,9 @@ namespace ecs {
 	 */
 	class Subscription {
 	public:
+		Subscription();
 		Subscription(boost::signals2::connection c);
+		Subscription(const Subscription &other) = default;
 
 		/**
 		 * Returns true if the registered callback will still be called
